@@ -47,11 +47,15 @@ class AuthStore:
 
     def ensure_admin(self) -> None:
         username = os.getenv("IRRIGATION_ADMIN_USER", "admin")
-        password = os.getenv("IRRIGATION_ADMIN_PASSWORD", "change-this-password")
+        configured_password = os.getenv("IRRIGATION_ADMIN_PASSWORD")
+        password = configured_password or "change-this-password"
         with sqlite3.connect(self.path) as conn:
-            row = conn.execute("SELECT username FROM users WHERE username=?", (username,)).fetchone()
+            row = conn.execute("SELECT password_hash FROM users WHERE username=?", (username,)).fetchone()
             if not row:
                 conn.execute("INSERT INTO users VALUES (?, ?, 1)", (username, hash_password(password)))
+                conn.commit()
+            elif configured_password and not verify_password(configured_password, row[0]):
+                conn.execute("UPDATE users SET password_hash=?, is_admin=1 WHERE username=?", (hash_password(configured_password), username))
                 conn.commit()
 
     def authenticate(self, username: str, password: str) -> bool:
