@@ -25,9 +25,8 @@ services:
   - type: web
     name: riego-ia-interfaz
     runtime: static
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
+    buildCommand: cd frontend && npm install --legacy-peer-deps --no-audit --no-fund && npm run build
+    staticPublishPath: ./frontend/dist
     envVars:
       - key: VITE_API_URL
         sync: false
