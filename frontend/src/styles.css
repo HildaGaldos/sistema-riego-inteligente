@@ -283,3 +283,16 @@ html[data-theme="dark"] .chat-quick-actions button { background: #1d3b3b; border
 html[data-theme="dark"] .chat-input input { background: #102029; color: #e5eeee; }
 html[data-theme="dark"] .login { background: radial-gradient(circle at 10% 20%, #1d5144, transparent 38%), #0e171e; }
 @media (max-width: 780px) { .topbar-controls { margin-left: auto; } .chatbot { right: 12px; bottom: 12px; } .chat-panel { max-height: calc(100vh - 90px); } }
+
+/* Acabado visual: superficies suaves, contraste y estados interactivos. */
+.app-shell { background: linear-gradient(135deg, #f5f9fc 0%, #eef7f4 55%, #f8fbff 100%); }
+.page-content { position: relative; }
+.page-content::before { content: ""; position: fixed; z-index: -1; top: 70px; right: 4%; width: 280px; height: 280px; border-radius: 50%; background: rgba(117, 211, 178, .12); filter: blur(3px); pointer-events: none; }
+.card, .metric-card, .model-card, .figure-card { box-shadow: 0 10px 28px rgba(38, 75, 88, .06); }
+.card:hover, .metric-card:hover, .model-card:hover { box-shadow: 0 14px 32px rgba(38, 75, 88, .1); }
+.hero-actions button, .panel-actions button, .upload-zone button, .report-row button, .next-button, .figure-card button, .chat-input button { background: linear-gradient(135deg, #075543, #128a70); }
+.hero-actions button:hover, .panel-actions button:hover, .upload-zone button:hover, .report-row button:hover, .next-button:hover, .figure-card button:hover, .chat-input button:hover { background: linear-gradient(135deg, #064638, #0b765f); transform: translateY(-1px); }
+.topbar-controls .theme-button:hover, .language-switch button:hover, .chat-quick-actions button:hover { transform: translateY(-1px); }
+html[data-theme="dark"] .app-shell { background: radial-gradient(circle at 90% 10%, #1b3e3a 0, transparent 28%), #0e171e; }
+html[data-theme="dark"] .page-content::before { background: rgba(60, 168, 139, .13); }
+html[data-theme="dark"] .card, html[data-theme="dark"] .metric-card, html[data-theme="dark"] .model-card, html[data-theme="dark"] .figure-card { box-shadow: 0 12px 30px rgba(0, 0, 0, .18); }
