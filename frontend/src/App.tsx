@@ -5,6 +5,39 @@ type Page = "dashboard" | "eda" | "training" | "cv" | "tuning" | "statistics" | 
 type Row = Record<string, unknown>;
 type Figure = { filename: string; size: number };
 type Report = { filename: string; size: number };
+type Language = "es" | "en";
+type Theme = "light" | "dark";
+
+const uiText = {
+  es: {
+    appName: "Sistema de Riego Inteligente", online: "SISTEMA EN LÍNEA", search: "Buscar módulos o resultados…",
+    navDashboard: "Panel principal", navEda: "EDA · Carga", navTraining: "Entrenamiento", navCv: "Validación cruzada",
+    navTuning: "Hiperparámetros", navStatistics: "Pruebas estadísticas", navReports: "Reportes", navPredict: "Predicción",
+    locked: "bloqueado", admin: "Usuario administrador", role: "Agrónomo principal", footer: "LABORATORIO DE RIEGO IA · Espacio de análisis científico",
+    footerRight: "Modelo persistido · API segura · Evidencia reproducible", loginTitle: "Sistema de Riego Inteligente",
+    loginDescription: "Laboratorio para comparar modelos de riego y convertir sus resultados en decisiones operativas.", username: "Usuario",
+    password: "Contraseña", login: "Ingresar al laboratorio", spanish: "Español", english: "English", light: "Modo claro", dark: "Modo oscuro",
+    chatTitle: "Asistente Riego IA", chatGreeting: "¡Hola! Puedo explicarte cada módulo, ayudarte a interpretar resultados y orientarte con el uso del sistema.",
+    chatPlaceholder: "Escribe tu pregunta…", send: "Enviar", chatOpen: "Abrir asistente", chatClose: "Cerrar asistente", chatReset: "Nueva conversación",
+    quickHow: "¿Cómo funciona el sistema?", quickData: "¿Cómo cargo mi dataset?", quickStats: "¿Qué significan las pruebas?", quickPrediction: "¿Cómo hago una predicción?",
+    assistantHint: "Respuestas sobre datos, modelos, estadísticas y reportes"
+  },
+  en: {
+    appName: "Smart Irrigation System", online: "SYSTEM ONLINE", search: "Search modules or results…",
+    navDashboard: "Main dashboard", navEda: "EDA · Upload", navTraining: "Training", navCv: "Cross-validation",
+    navTuning: "Hyperparameters", navStatistics: "Statistical tests", navReports: "Reports", navPredict: "Prediction",
+    locked: "locked", admin: "Administrator", role: "Lead agronomist", footer: "SMART IRRIGATION LAB · Scientific analysis workspace",
+    footerRight: "Persisted model · Secure API · Reproducible evidence", loginTitle: "Smart Irrigation System",
+    loginDescription: "Laboratory for comparing irrigation models and turning results into operational decisions.", username: "Username",
+    password: "Password", login: "Enter the laboratory", spanish: "Español", english: "English", light: "Light mode", dark: "Dark mode",
+    chatTitle: "Irrigation AI assistant", chatGreeting: "Hello! I can explain every module, help interpret results, and guide you through the system.",
+    chatPlaceholder: "Type your question…", send: "Send", chatOpen: "Open assistant", chatClose: "Close assistant", chatReset: "New conversation",
+    quickHow: "How does the system work?", quickData: "How do I upload my dataset?", quickStats: "What do the tests mean?", quickPrediction: "How do I make a prediction?",
+    assistantHint: "Answers about data, models, statistics, and reports"
+  }
+} as const;
+type UiKey = keyof typeof uiText.es;
+function t(language: Language, key: UiKey): string { return uiText[language][key]; }
 
 const initialPipeline: api.PipelineStatus = { status: "idle", stage: "data_validation", progress: 0, message: "Listo para iniciar", detail: "Cargue el conjunto de datos desde EDA" };
 const stages = [
@@ -34,12 +67,20 @@ const pipelineStatusLabels: Record<string, string> = { idle: "En espera", starti
 function label(text: string): string { if (translatedLabels[text]) return translatedLabels[text]; return text.replace(/_/g, " ").replace(/\b\w/g, (letter: string) => letter.toUpperCase()); }
 function statusLabel(status: string): string { return pipelineStatusLabels[status] ?? status; }
 
-function Login({ onLogin }: { onLogin: () => void }) {
+function LanguageSwitch({ language, setLanguage }: { language: Language; setLanguage: (language: Language) => void }) {
+  return <div className="language-switch" aria-label="Language / Idioma"><button className={language === "es" ? "selected" : ""} onClick={() => setLanguage("es")} type="button">ES</button><button className={language === "en" ? "selected" : ""} onClick={() => setLanguage("en")} type="button">EN</button></div>;
+}
+
+function ThemeButton({ theme, toggleTheme, language }: { theme: Theme; toggleTheme: () => void; language: Language }) {
+  return <button className="theme-button" type="button" onClick={toggleTheme} aria-label={theme === "dark" ? t(language, "light") : t(language, "dark")} title={theme === "dark" ? t(language, "light") : t(language, "dark")}>{theme === "dark" ? "☀" : "☾"}</button>;
+}
+
+function Login({ onLogin, language, setLanguage, theme, toggleTheme }: { onLogin: () => void; language: Language; setLanguage: (language: Language) => void; theme: Theme; toggleTheme: () => void }) {
   const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   async function submit(event: React.FormEvent) { event.preventDefault(); setError(""); try { await api.login(username, password); onLogin(); } catch (error) { setError((error as Error).message); } }
-  return <main className="login"><section className="card login-card"><div className="brand large">Riego IA<span>●</span><small>LABORATORIO DE AGRONOMÍA v2.1</small></div><h1>Sistema de Riego Inteligente</h1><p>Laboratorio para comparar modelos de riego y convertir sus resultados en decisiones operativas.</p><form onSubmit={submit}><label>Usuario<input value={username} onChange={event => setUsername(event.target.value)} required /></label><label>Contraseña<input type="password" value={password} onChange={event => setPassword(event.target.value)} required /></label>{error && <p className="error">{error}</p>}<button>Ingresar al laboratorio</button></form></section></main>;
+  return <main className="login"><div className="login-tools"><LanguageSwitch language={language} setLanguage={setLanguage} /><ThemeButton language={language} theme={theme} toggleTheme={toggleTheme} /></div><section className="card login-card"><div className="brand large">Riego IA<span>●</span><small>LABORATORIO DE AGRONOMÍA v2.1</small></div><h1>{t(language, "loginTitle")}</h1><p>{t(language, "loginDescription")}</p><form onSubmit={submit}><label>{t(language, "username")}<input value={username} onChange={event => setUsername(event.target.value)} required /></label><label>{t(language, "password")}<input type="password" value={password} onChange={event => setPassword(event.target.value)} required /></label>{error && <p className="error">{error}</p>}<button>{t(language, "login")}</button></form></section></main>;
 }
 
 function MetricCard({ label: title, value, detail, tone = "light" }: { label: string; value: string; detail: string; tone?: "light" | "green" }) {
@@ -145,8 +186,52 @@ function ReportsPage({ reports, statistics, metrics, metadata, figures }: { repo
   return <section><div className="section-heading"><span className="breadcrumb">07 / REPORTES</span><h2>Reportes científicos y entregables</h2><p>Un centro de resultados para auditar el conjunto de datos, comparar los modelos, interpretar las pruebas y descargar la evidencia.</p></div><div className="metric-grid four"><MetricCard label="Modelo seleccionado" value={String(metadata.model_name ?? "—")} detail="Guardado como H5" tone="green" /><MetricCard label="Modelos comparados" value={String(metrics.length || "—")} detail="Clásicos e híbridos" /><MetricCard label="Friedman" value={friedman.p_value != null ? num(friedman.p_value, 5) : "—"} detail="Prueba global" /><MetricCard label="Figuras incluidas" value={String(figures.length)} detail="Preparación y evaluación" /></div><div className="report-layout"><article className="card report-center"><div className="section-title"><div><span className="eyebrow">EXPORTACIÓN EN VARIOS FORMATOS</span><h3>Descargar análisis completo</h3></div><span className="status-pill completed">listo</span></div>{reports.length ? reports.map(report => <div className="report-row" key={report.filename}><div><strong>{report.filename}</strong><small>{Math.round(report.size / 1024)} KB · tablas · figuras · interpretación</small></div><button onClick={() => void download(report.filename)} disabled={downloading === report.filename}>{downloading === report.filename ? "Preparando…" : "Descargar"}</button></div>) : <p className="muted">Ejecute el entrenamiento para generar PDF, Word y Excel.</p>}</article><article className="card report-checklist"><h3>Contenido del informe</h3>{["Calidad y limpieza del conjunto de datos", "Tabla de métricas y tiempos", "Validación cruzada por pliegue", "t de Student pareada", "Friedman y Wilcoxon + Holm", "Matriz de confusión, ROC y mapas de calor", "Modelo H5 y metadatos de inferencia", "Limitaciones e interpretación en español"].map(item => <p key={item}>✓ {item}</p>)}</article></div><article className="card figures-card"><div className="section-title"><div><span className="eyebrow">FIGURAS PARA REVISIÓN</span><h3>Vista previa de la evidencia</h3></div></div><FigureGallery figures={figures} /></article></section>;
 }
 
+type ChatMessage = { id: number; role: "assistant" | "user"; text: string };
+
+function assistantReply(question: string, language: Language, pipeline: api.PipelineStatus, dataset?: api.DatasetStatus): string {
+  const q = question.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const available = dataset?.available ? (language === "es" ? "El dataset está disponible y validado." : "The dataset is available and validated.") : (language === "es" ? "Todavía no hay un dataset validado." : "There is no validated dataset yet.");
+  const status = language === "es" ? `El estado actual del flujo es «${statusLabel(pipeline.status)}».` : `The current pipeline status is “${pipeline.status}”.`;
+  if (q.includes("dataset") || q.includes("datos") || q.includes("cargar") || q.includes("upload") || q.includes("eda")) {
+    return language === "es" ? `${available} Ve a EDA, selecciona un archivo CSV/XLSX/XLS y pulsa «Validar y limpiar». El sistema normaliza columnas, revisa faltantes y duplicados, y excluye result=2 del estudio binario.` : `${available} Go to EDA, select a CSV/XLSX/XLS file, and click “Validate and clean”. The system normalizes columns, checks missing values and duplicates, and excludes result=2 from the binary study.`;
+  }
+  if (q.includes("entren") || q.includes("modelo") || q.includes("training") || q.includes("model")) {
+    return language === "es" ? `${status} En Entrenamiento se ejecutan MLP, DNN, RBF, CNN-MLP y LSTM-MLP. Se comparan exactitud, F1, ROC-AUC, tiempos, matriz de confusión y curvas ROC. El mejor modelo se guarda en H5 para no reentrenar.` : `${status} Training runs MLP, DNN, RBF, CNN-MLP, and LSTM-MLP. It compares accuracy, F1, ROC-AUC, timing, confusion matrix, and ROC curves. The best model is saved as H5 so it is not retrained.`;
+  }
+  if (q.includes("t student") || q.includes("friedman") || q.includes("wilcoxon") || q.includes("estadistic") || q.includes("statistical") || q.includes("test")) {
+    return language === "es" ? "Las pruebas usan resultados pareados por pliegue: t de Student pareada compara medias, Friedman contrasta todos los modelos globalmente y Wilcoxon compara pares sin asumir normalidad. El sistema muestra estadístico, valor p, Holm, tamaño de efecto e interpretación." : "The tests use fold-paired results: paired Student’s t compares means, Friedman provides a global comparison, and Wilcoxon compares pairs without assuming normality. The system shows the statistic, p-value, Holm adjustment, effect size, and interpretation.";
+  }
+  if (q.includes("predic") || q.includes("riego") || q.includes("prediction") || q.includes("irrigation")) {
+    return language === "es" ? "En Predicción puedes evaluar una parcela con temperatura, humedad, MOI, suelo y etapa del cultivo, o procesar un CSV/XLSX por lote. La recomendación usa el modelo H5 guardado y muestra probabilidad, clase y decisión." : "In Prediction you can evaluate one plot using temperature, humidity, MOI, soil, and crop stage, or process a CSV/XLSX batch. The recommendation uses the saved H5 model and shows probability, class, and decision.";
+  }
+  if (q.includes("reporte") || q.includes("report") || q.includes("pdf") || q.includes("excel") || q.includes("word")) {
+    return language === "es" ? "Reportes permite descargar PDF, Word y Excel con calidad de datos, métricas, validación cruzada, pruebas t/Friedman/Wilcoxon, figuras e interpretación científica." : "Reports lets you download PDF, Word, and Excel files with data quality, metrics, cross-validation, t/Friedman/Wilcoxon tests, figures, and scientific interpretation.";
+  }
+  if (q.includes("oscuro") || q.includes("claro") || q.includes("dark") || q.includes("light") || q.includes("idioma") || q.includes("language")) {
+    return language === "es" ? "Usa los controles ES/EN y ☾/☀ en la barra superior. La preferencia se guarda automáticamente en este navegador." : "Use the ES/EN and ☾/☀ controls in the top bar. Your preference is saved automatically in this browser.";
+  }
+  return language === "es" ? `Puedo ayudarte con EDA, entrenamiento, validación cruzada, hiperparámetros, pruebas estadísticas, reportes y predicción. ${status} Pregúntame, por ejemplo: «¿Cómo interpreto Friedman?»` : `I can help with EDA, training, cross-validation, hyperparameters, statistical tests, reports, and prediction. ${status} Try asking: “How do I interpret Friedman?”`;
+}
+
+function ChatBot({ language, pipeline, dataset }: { language: Language; pipeline: api.PipelineStatus; dataset?: api.DatasetStatus }) {
+  const [open, setOpen] = useState(false);
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState<ChatMessage[]>([{ id: 1, role: "assistant", text: t(language, "chatGreeting") }]);
+  const quickQuestions = [t(language, "quickHow"), t(language, "quickData"), t(language, "quickStats"), t(language, "quickPrediction")];
+  function send(rawQuestion: string) {
+    const question = rawQuestion.trim();
+    if (!question) return;
+    setMessages(current => [...current, { id: Date.now(), role: "user", text: question }, { id: Date.now() + 1, role: "assistant", text: assistantReply(question, language, pipeline, dataset) }]);
+    setInput("");
+  }
+  function reset() { setMessages([{ id: Date.now(), role: "assistant", text: t(language, "chatGreeting") }]); }
+  return <div className={`chatbot ${open ? "is-open" : ""}`}><button className="chat-launcher" type="button" onClick={() => setOpen(!open)} aria-label={open ? t(language, "chatClose") : t(language, "chatOpen")}><span>{open ? "×" : "✦"}</span><b>{open ? t(language, "chatClose") : "IA"}</b></button>{open && <section className="chat-panel" aria-label={t(language, "chatTitle")}><header className="chat-header"><div><strong>{t(language, "chatTitle")}</strong><small>{t(language, "assistantHint")}</small></div><button type="button" onClick={reset} title={t(language, "chatReset")}>↺</button></header><div className="chat-messages" aria-live="polite">{messages.map(message => <div className={`chat-message ${message.role}`} key={message.id}>{message.role === "assistant" && <span className="chat-avatar">IA</span>}<p>{message.text}</p></div>)}</div><div className="chat-quick-actions">{quickQuestions.map(question => <button type="button" key={question} onClick={() => send(question)}>{question}</button>)}</div><form className="chat-input" onSubmit={event => { event.preventDefault(); send(input); }}><input value={input} onChange={event => setInput(event.target.value)} placeholder={t(language, "chatPlaceholder")} aria-label={t(language, "chatPlaceholder")} /><button type="submit">{t(language, "send")}</button></form></section>}</div>;
+}
+
 function App() {
   const [logged, setLogged] = useState(Boolean(sessionStorage.getItem("irrigation_token")));
+  const [language, setLanguage] = useState<Language>(() => (localStorage.getItem("irrigation_language") as Language | null) ?? "es");
+  const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem("irrigation_theme") as Theme | null) ?? "light");
   const [page, setPage] = useState<Page>("dashboard");
   const [dataset, setDataset] = useState<api.DatasetStatus>();
   const [pipeline, setPipeline] = useState<api.PipelineStatus>(initialPipeline);
@@ -160,11 +245,14 @@ function App() {
   const refresh = async () => { try { const [dataResult, pipelineResult, metricResult, cvResult, tuningResult, statisticsResult, figureResult] = await Promise.all([api.status(), api.trainStatus(), api.metrics(), api.cv(), api.tuning(), api.statistics(), api.figures()]); setDataset(dataResult); setPipeline(pipelineResult); setMetrics(metricResult.models); setCv(cvResult.rows); setTuning(tuningResult); setStatistics(statisticsResult); setFigures(figureResult.figures); try { setMetadata(await api.modelMetadata()); } catch { setMetadata({}); } try { setReports((await api.reports()).reports); } catch { setReports([]); } } catch (error) { if ((error as Error).message === "AUTH_EXPIRED") { api.logout(); setLogged(false); } } };
   useEffect(() => { if (logged) void refresh(); }, [logged]);
   useEffect(() => { if (!logged) return; const timer = window.setInterval(() => void refresh(), 2500); return () => window.clearInterval(timer); }, [logged]);
+  useEffect(() => { localStorage.setItem("irrigation_language", language); document.documentElement.lang = language; }, [language]);
+  useEffect(() => { localStorage.setItem("irrigation_theme", theme); document.documentElement.dataset.theme = theme; }, [theme]);
   async function start(fast: boolean, folds: number, trials: number) { try { await api.runPipeline(fast, folds, trials); setPage("training"); await refresh(); } catch (error) { window.alert((error as Error).message); } }
   async function cancel() { try { await api.cancelPipeline(); await refresh(); } catch (error) { window.alert((error as Error).message); } }
-  if (!logged) return <Login onLogin={() => setLogged(true)} />;
-  const nav: [Page, string][] = [["dashboard", "Panel principal"], ["eda", "EDA · Carga"], ["training", "Entrenamiento"], ["cv", "Validación cruzada"], ["tuning", "Hiperparámetros"], ["statistics", "Pruebas estadísticas"], ["reports", "Reportes"], ["predict", "Predicción"]];
-  return <div className="app-shell"><aside className="sidebar"><div className="lab-brand"><strong>Riego IA</strong><span>LABORATORIO DE AGRONOMÍA v2.1</span></div><div className="nav-label">MÓDULOS PRINCIPALES</div><nav>{nav.map(([id, title]) => { const locked = ["cv", "tuning", "statistics", "reports", "predict"].includes(id) && pipeline.status !== "completed"; return <button key={id} className={page === id ? "active" : ""} disabled={locked} onClick={() => setPage(id)}><i>{id === "dashboard" ? "▦" : id === "eda" ? "↥" : id === "training" ? "◉" : id === "cv" ? "↝" : id === "tuning" ? "⌘" : id === "statistics" ? "∑" : id === "reports" ? "▥" : "⌁"}</i>{title}{locked && <small>bloqueado</small>}</button>; })}</nav><div className="user-card"><b>AL</b><div><strong>Usuario administrador</strong><span>Agrónomo principal</span></div></div></aside><div className="app-main"><header className="topbar"><strong>Sistema de Riego Inteligente</strong><span className="online"><i /> SISTEMA EN LÍNEA</span><input className="search" placeholder="Buscar módulos o resultados…" /><span className="top-icon">♧</span><span className="top-icon">◎</span></header><main className="page-content">{page === "dashboard" && <DashboardPage dataset={dataset} pipeline={pipeline} metrics={metrics} onStart={start} onCancel={cancel} go={setPage} />}{page === "eda" && <EdaPage dataset={dataset} onRefresh={refresh} go={setPage} />}{page === "training" && <TrainingPage pipeline={pipeline} metrics={metrics} figures={figures} metadata={metadata} onStart={start} onCancel={cancel} />}{page === "cv" && <CrossValidationPage rows={cv} onStart={start} />}{page === "tuning" && <TuningPage tuning={tuning} onStart={start} />}{page === "statistics" && <StatisticsPage statistics={statistics} />}{page === "reports" && <ReportsPage reports={reports} statistics={statistics} metrics={metrics} metadata={metadata} figures={figures} />}{page === "predict" && <PredictionPage metadata={metadata} />}</main><footer className="footer"><span>LABORATORIO DE RIEGO IA · Espacio de análisis científico</span><span>Modelo persistido · API segura · Evidencia reproducible</span></footer></div></div>;
+  if (!logged) return <Login onLogin={() => setLogged(true)} language={language} setLanguage={setLanguage} theme={theme} toggleTheme={() => setTheme(current => current === "dark" ? "light" : "dark")} />;
+  const nav: [Page, string][] = [["dashboard", t(language, "navDashboard")], ["eda", t(language, "navEda")], ["training", t(language, "navTraining")], ["cv", t(language, "navCv")], ["tuning", t(language, "navTuning")], ["statistics", t(language, "navStatistics")], ["reports", t(language, "navReports")], ["predict", t(language, "navPredict")]];
+  const toggleTheme = () => setTheme(current => current === "dark" ? "light" : "dark");
+  return <div className="app-shell"><aside className="sidebar"><div className="lab-brand"><strong>Riego IA</strong><span>LABORATORIO DE AGRONOMÍA v2.1</span></div><div className="nav-label">{language === "es" ? "MÓDULOS PRINCIPALES" : "MAIN MODULES"}</div><nav>{nav.map(([id, title]) => { const locked = ["cv", "tuning", "statistics", "reports", "predict"].includes(id) && pipeline.status !== "completed"; return <button key={id} className={page === id ? "active" : ""} disabled={locked} onClick={() => setPage(id)}><i>{id === "dashboard" ? "▦" : id === "eda" ? "↥" : id === "training" ? "◉" : id === "cv" ? "↝" : id === "tuning" ? "⌘" : id === "statistics" ? "∑" : id === "reports" ? "▥" : "⌁"}</i>{title}{locked && <small>{t(language, "locked")}</small>}</button>; })}</nav><div className="user-card"><b>AL</b><div><strong>{t(language, "admin")}</strong><span>{t(language, "role")}</span></div></div></aside><div className="app-main"><header className="topbar"><strong>{t(language, "appName")}</strong><span className="online"><i /> {t(language, "online")}</span><input className="search" placeholder={t(language, "search")} /><div className="topbar-controls"><LanguageSwitch language={language} setLanguage={setLanguage} /><ThemeButton language={language} theme={theme} toggleTheme={toggleTheme} /></div></header><main className="page-content">{page === "dashboard" && <DashboardPage dataset={dataset} pipeline={pipeline} metrics={metrics} onStart={start} onCancel={cancel} go={setPage} />}{page === "eda" && <EdaPage dataset={dataset} onRefresh={refresh} go={setPage} />}{page === "training" && <TrainingPage pipeline={pipeline} metrics={metrics} figures={figures} metadata={metadata} onStart={start} onCancel={cancel} />}{page === "cv" && <CrossValidationPage rows={cv} onStart={start} />}{page === "tuning" && <TuningPage tuning={tuning} onStart={start} />}{page === "statistics" && <StatisticsPage statistics={statistics} />}{page === "reports" && <ReportsPage reports={reports} statistics={statistics} metrics={metrics} metadata={metadata} figures={figures} />}{page === "predict" && <PredictionPage metadata={metadata} />}</main><footer className="footer"><span>{t(language, "footer")}</span><span>{t(language, "footerRight")}</span></footer><ChatBot language={language} pipeline={pipeline} dataset={dataset} /></div></div>;
 }
 
 export default App;
