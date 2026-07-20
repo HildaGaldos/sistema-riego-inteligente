@@ -1,0 +1,50 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    env_file: .env
+    environment:
+      PYTHONPATH: /app/ml/src
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./artifacts:/app/artifacts
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:8000
+    depends_on:
+      - api
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: streamlit_app/Dockerfile
+    env_file: .env
+    environment:
+      API_URL: http://api:8000
+    ports:
+      - "8501:8501"
+    depends_on:
+      - api
+    profiles: [dashboard]
+
+  trainer:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    env_file: .env
+    environment:
+      PYTHONPATH: /app/ml/src
+    command: ["python", "scripts/train.py", "--fast"]
+    volumes:
+      - ./data:/app/data
+      - ./artifacts:/app/artifacts
+    profiles: [trainer]

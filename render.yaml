@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: riego-ia-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: IRRIGATION_ADMIN_USER
+        sync: false
+      - key: IRRIGATION_ADMIN_PASSWORD
+        sync: false
+      - key: FRONTEND_ORIGIN
+        sync: false
+      - key: DATA_DIR
+        value: /app/data/raw
+      - key: ARTIFACTS_DIR
+        value: /app/artifacts
+      - key: ALLOW_DOCS
+        value: "false"
+
+  - type: web
+    name: riego-ia-interfaz
+    runtime: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false

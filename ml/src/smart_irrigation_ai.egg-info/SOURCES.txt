@@ -1,0 +1,15 @@
+README.md
+pyproject.toml
+ml/src/smart_irrigation_ai.egg-info/PKG-INFO
+ml/src/smart_irrigation_ai.egg-info/SOURCES.txt
+ml/src/smart_irrigation_ai.egg-info/dependency_links.txt
+ml/src/smart_irrigation_ai.egg-info/top_level.txt
+ml/src/irrigation_ml/__init__.py
+ml/src/irrigation_ml/__main__.py
+ml/src/irrigation_ml/cli.py
+ml/src/irrigation_ml/data.py
+ml/src/irrigation_ml/evaluation.py
+ml/src/irrigation_ml/models.py
+ml/src/irrigation_ml/reports.py
+ml/src/irrigation_ml/training.py
+ml/src/smart_irrigation_ai.egg-info/SOURCES.txt

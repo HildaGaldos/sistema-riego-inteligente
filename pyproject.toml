@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "smart-irrigation-ai"
+version = "0.1.0"
+description = "Reproducible smart irrigation neural-network study"
+requires-python = ">=3.11"
+
+[tool.setuptools.packages.find]
+where = ["ml/src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+pythonpath = [".", "ml/src"]
+testpaths = ["backend/tests", "ml/tests"]
