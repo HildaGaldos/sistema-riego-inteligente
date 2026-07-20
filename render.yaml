@@ -14,7 +14,7 @@ services:
       - key: IRRIGATION_ADMIN_PASSWORD
         sync: false
       - key: FRONTEND_ORIGIN
-        sync: false
+        value: https://riego-ia-interfaz.onrender.com
       - key: DATA_DIR
         value: /app/data/raw
       - key: ARTIFACTS_DIR
@@ -29,4 +29,4 @@ services:
     staticPublishPath: ./frontend/dist
     envVars:
       - key: VITE_API_URL
-        sync: false
+        value: https://riego-ia-api.onrender.com
