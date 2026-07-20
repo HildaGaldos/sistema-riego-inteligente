@@ -192,6 +192,9 @@ function assistantReply(question: string, language: Language, pipeline: api.Pipe
   const q = question.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const available = dataset?.available ? (language === "es" ? "El dataset está disponible y validado." : "The dataset is available and validated.") : (language === "es" ? "Todavía no hay un dataset validado." : "There is no validated dataset yet.");
   const status = language === "es" ? `El estado actual del flujo es «${statusLabel(pipeline.status)}».` : `The current pipeline status is “${pipeline.status}”.`;
+  if (q.includes("funciona") || q.includes("flujo") || q.includes("pipeline") || q.includes("how does") || q.includes("how it works")) {
+    return language === "es" ? `El flujo es secuencial: 1) EDA carga y limpia el dataset, 2) Entrenamiento compara cinco modelos, 3) Validación cruzada mide la generalización, 4) Hiperparámetros optimiza configuraciones, 5) Pruebas estadísticas comparan resultados, 6) Reportes exporta la evidencia y 7) Predicción consume el mejor H5. ${status}` : `The workflow is sequential: 1) EDA uploads and cleans the dataset, 2) Training compares five models, 3) Cross-validation measures generalization, 4) Hyperparameters optimizes configurations, 5) Statistical tests compare results, 6) Reports exports the evidence, and 7) Prediction consumes the best H5 model. ${status}`;
+  }
   if (q.includes("dataset") || q.includes("datos") || q.includes("cargar") || q.includes("upload") || q.includes("eda")) {
     return language === "es" ? `${available} Ve a EDA, selecciona un archivo CSV/XLSX/XLS y pulsa «Validar y limpiar». El sistema normaliza columnas, revisa faltantes y duplicados, y excluye result=2 del estudio binario.` : `${available} Go to EDA, select a CSV/XLSX/XLS file, and click “Validate and clean”. The system normalizes columns, checks missing values and duplicates, and excludes result=2 from the binary study.`;
   }
