@@ -44,19 +44,37 @@ class AuthStore:
             conn.execute("CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, password_hash TEXT NOT NULL, is_admin INTEGER NOT NULL DEFAULT 0)")
             conn.commit()
         self.ensure_admin()
+        self.ensure_reader()
+
+    def _ensure_user(self, username: str, configured_password: str | None, is_admin: bool, fallback_password: str) -> None:
+        password = configured_password or fallback_password
+        with sqlite3.connect(self.path) as conn:
+            row = conn.execute("SELECT password_hash, is_admin FROM users WHERE username=?", (username,)).fetchone()
+            if not row:
+                conn.execute("INSERT INTO users VALUES (?, ?, ?)", (username, hash_password(password), int(is_admin)))
+                conn.commit()
+            else:
+                password_changed = configured_password and not verify_password(configured_password, row[0])
+                role_changed = bool(row[1]) != is_admin
+                if password_changed or role_changed:
+                    conn.execute("UPDATE users SET password_hash=?, is_admin=? WHERE username=?", (hash_password(password), int(is_admin), username))
+                    conn.commit()
 
     def ensure_admin(self) -> None:
-        username = os.getenv("IRRIGATION_ADMIN_USER", "admin")
-        configured_password = os.getenv("IRRIGATION_ADMIN_PASSWORD")
-        password = configured_password or "change-this-password"
-        with sqlite3.connect(self.path) as conn:
-            row = conn.execute("SELECT password_hash FROM users WHERE username=?", (username,)).fetchone()
-            if not row:
-                conn.execute("INSERT INTO users VALUES (?, ?, 1)", (username, hash_password(password)))
-                conn.commit()
-            elif configured_password and not verify_password(configured_password, row[0]):
-                conn.execute("UPDATE users SET password_hash=?, is_admin=1 WHERE username=?", (hash_password(configured_password), username))
-                conn.commit()
+        self._ensure_user(
+            os.getenv("IRRIGATION_ADMIN_USER", "admin"),
+            os.getenv("IRRIGATION_ADMIN_PASSWORD"),
+            True,
+            "change-this-password",
+        )
+
+    def ensure_reader(self) -> None:
+        self._ensure_user(
+            os.getenv("IRRIGATION_READER_USER", "consulta"),
+            os.getenv("IRRIGATION_READER_PASSWORD"),
+            False,
+            "change-this-reader-password",
+        )
 
     def authenticate(self, username: str, password: str) -> bool:
         with sqlite3.connect(self.path) as conn:

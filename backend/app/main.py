@@ -100,9 +100,16 @@ class PredictionInput(BaseModel):
 def current_user(token: str = Depends(oauth2)) -> dict:
     try:
         data = decode_token(token, SECRET_KEY)
-        return {"username": data["sub"], "is_admin": auth_store.is_admin(data["sub"])}
+        is_admin = auth_store.is_admin(data["sub"])
+        return {"username": data["sub"], "is_admin": is_admin, "role": "admin" if is_admin else "reader"}
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc), headers={"WWW-Authenticate": "Bearer"}) from exc
+
+
+def require_admin(user: dict = Depends(current_user)) -> dict:
+    if not user["is_admin"]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Este módulo está disponible únicamente para el administrador.")
+    return user
 
 
 @app.get("/health")
@@ -114,7 +121,8 @@ def health():
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
     if not auth_store.authenticate(form_data.username, form_data.password):
         raise HTTPException(status_code=401, detail="Usuario o contraseña incorrectos")
-    return {"access_token": create_token(form_data.username, SECRET_KEY, int(os.getenv("JWT_EXPIRE_MINUTES", "60"))), "token_type": "bearer"}
+    is_admin = auth_store.is_admin(form_data.username)
+    return {"access_token": create_token(form_data.username, SECRET_KEY, int(os.getenv("JWT_EXPIRE_MINUTES", "60"))), "token_type": "bearer", "username": form_data.username, "is_admin": is_admin, "role": "admin" if is_admin else "reader"}
 
 
 @app.get("/auth/me")
@@ -123,7 +131,7 @@ def me(user: dict = Depends(current_user)):
 
 
 @app.post("/data/upload")
-def upload_dataset(file: UploadFile = File(...), user: dict = Depends(current_user)):
+def upload_dataset(file: UploadFile = File(...), user: dict = Depends(require_admin)):
     try:
         return save_uploaded_dataset(file, DATA_DIR)
     except (ValueError, FileNotFoundError) as exc:
@@ -131,7 +139,7 @@ def upload_dataset(file: UploadFile = File(...), user: dict = Depends(current_us
 
 
 @app.get("/data/status")
-def data_status(user: dict = Depends(current_user)):
+def data_status(user: dict = Depends(require_admin)):
     return dataset_status(DATA_DIR)
 
 
@@ -178,7 +186,7 @@ def model_metadata(user: dict = Depends(current_user)):
 
 
 @app.get("/model/artifacts/{filename}")
-def model_artifact(filename: str, user: dict = Depends(current_user)):
+def model_artifact(filename: str, user: dict = Depends(require_admin)):
     """Download the persisted best model without launching training again."""
 
     allowed = {"best_irrigation_model.h5", "best_irrigation_model.keras", "preprocessor.joblib", "threshold.json"}
@@ -193,7 +201,7 @@ def model_artifact(filename: str, user: dict = Depends(current_user)):
 
 
 @app.get("/metrics/summary")
-def metrics_summary(user: dict = Depends(current_user)):
+def metrics_summary(user: dict = Depends(require_admin)):
     path = Path(ARTIFACTS_DIR) / "metrics" / "model_comparison.csv"
     if not path.exists():
         return {"available": False, "models": []}
@@ -202,19 +210,19 @@ def metrics_summary(user: dict = Depends(current_user)):
 
 
 @app.get("/eda/summary")
-def eda_summary(user: dict = Depends(current_user)):
+def eda_summary(user: dict = Depends(require_admin)):
     path = Path(ARTIFACTS_DIR) / "metrics" / "data_quality.json"
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"available": False}
 
 
 @app.get("/eda/figures")
-def eda_figures(user: dict = Depends(current_user)):
+def eda_figures(user: dict = Depends(require_admin)):
     root = Path(ARTIFACTS_DIR) / "figures"
     return {"figures": [{"filename": p.name, "size": p.stat().st_size} for p in sorted(root.glob("*.png"))]}
 
 
 @app.get("/eda/figures/{filename}")
-def eda_figure(filename: str, user: dict = Depends(current_user)):
+def eda_figure(filename: str, user: dict = Depends(require_admin)):
     root = (Path(ARTIFACTS_DIR) / "figures").resolve()
     path = (root / Path(filename).name).resolve()
     if path.parent != root or not path.exists():
@@ -224,7 +232,7 @@ def eda_figure(filename: str, user: dict = Depends(current_user)):
 
 
 @app.get("/metrics/cv")
-def cv_summary(user: dict = Depends(current_user)):
+def cv_summary(user: dict = Depends(require_admin)):
     path = Path(ARTIFACTS_DIR) / "metrics" / "cv_results.csv"
     if not path.exists():
         return {"available": False, "rows": []}
@@ -233,13 +241,13 @@ def cv_summary(user: dict = Depends(current_user)):
 
 
 @app.get("/tuning/summary")
-def tuning_summary(user: dict = Depends(current_user)):
+def tuning_summary(user: dict = Depends(require_admin)):
     path = Path(ARTIFACTS_DIR) / "metrics" / "tuning.json"
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"available": False}
 
 
 @app.get("/statistics/summary")
-def statistics_summary(user: dict = Depends(current_user)):
+def statistics_summary(user: dict = Depends(require_admin)):
     path = Path(ARTIFACTS_DIR) / "metrics" / "statistical_tests.json"
     if not path.exists():
         return {"available": False}
@@ -269,14 +277,14 @@ def statistics_summary(user: dict = Depends(current_user)):
 
 
 @app.get("/reports")
-def reports(user: dict = Depends(current_user)):
+def reports(user: dict = Depends(require_admin)):
     root = Path(ARTIFACTS_DIR) / "reports"
     allowed = {".pdf", ".docx", ".xlsx"}
     return {"reports": [{"filename": p.name, "size": p.stat().st_size} for p in sorted(root.glob("*")) if p.is_file() and p.suffix.lower() in allowed]}
 
 
 @app.get("/reports/{filename}")
-def report(filename: str, user: dict = Depends(current_user)):
+def report(filename: str, user: dict = Depends(require_admin)):
     root = (Path(ARTIFACTS_DIR) / "reports").resolve()
     path = (root / Path(filename).name).resolve()
     if path.parent != root or not path.exists():
@@ -352,10 +360,10 @@ def pipeline_cancel(user: dict = Depends(current_user)):
 
 
 @app.get("/train/status")
-def train_status(user: dict = Depends(current_user)):
+def train_status(user: dict = Depends(require_admin)):
     return dict(training_state)
 
 
 @app.get("/pipeline/status")
-def pipeline_status(user: dict = Depends(current_user)):
+def pipeline_status(user: dict = Depends(require_admin)):
     return dict(training_state)

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as api from "./api";
 
 type Page = "dashboard" | "eda" | "training" | "cv" | "tuning" | "statistics" | "reports" | "predict";
@@ -20,7 +20,7 @@ const uiText = {
     chatTitle: "Asistente Riego IA", chatGreeting: "¡Hola! Puedo explicarte cada módulo, ayudarte a interpretar resultados y orientarte con el uso del sistema.",
     chatPlaceholder: "Escribe tu pregunta…", send: "Enviar", chatOpen: "Abrir asistente", chatClose: "Cerrar asistente", chatReset: "Nueva conversación",
     quickHow: "¿Cómo funciona el sistema?", quickData: "¿Cómo cargo mi dataset?", quickStats: "¿Qué significan las pruebas?", quickPrediction: "¿Cómo hago una predicción?",
-    assistantHint: "Respuestas sobre datos, modelos, estadísticas y reportes"
+    assistantHint: "Respuestas sobre datos, modelos, estadísticas y reportes", voiceOn: "Voz activada", voiceOff: "Voz desactivada", listen: "Hablar al asistente", listening: "Escuchando…", voiceUnavailable: "Tu navegador no permite dictado por voz.", speak: "Escuchar respuesta", readerTitle: "Centro de predicción", readerSubtitle: "Consulta resultados de riego listos para usar", readerOnly: "Vista de usuario lector", readyForPrediction: "Modelo listo para recomendar riego", logout: "Cerrar sesión", loadingSession: "Cargando sesión…"
   },
   en: {
     appName: "Smart Irrigation System", online: "SYSTEM ONLINE", search: "Search modules or results…",
@@ -33,7 +33,7 @@ const uiText = {
     chatTitle: "Irrigation AI assistant", chatGreeting: "Hello! I can explain every module, help interpret results, and guide you through the system.",
     chatPlaceholder: "Type your question…", send: "Send", chatOpen: "Open assistant", chatClose: "Close assistant", chatReset: "New conversation",
     quickHow: "How does the system work?", quickData: "How do I upload my dataset?", quickStats: "What do the tests mean?", quickPrediction: "How do I make a prediction?",
-    assistantHint: "Answers about data, models, statistics, and reports"
+    assistantHint: "Answers about data, models, statistics, and reports", voiceOn: "Voice enabled", voiceOff: "Voice disabled", listen: "Speak to the assistant", listening: "Listening…", voiceUnavailable: "Your browser does not support voice dictation.", speak: "Listen to response", readerTitle: "Prediction center", readerSubtitle: "Review ready-to-use irrigation results", readerOnly: "Reader user view", readyForPrediction: "Model ready to recommend irrigation", logout: "Log out", loadingSession: "Loading session…"
   }
 } as const;
 type UiKey = keyof typeof uiText.es;
@@ -106,12 +106,12 @@ function ThemeButton({ theme, toggleTheme, language }: { theme: Theme; toggleThe
   return <button className="theme-button" type="button" onClick={toggleTheme} aria-label={theme === "dark" ? t(language, "light") : t(language, "dark")} title={theme === "dark" ? t(language, "light") : t(language, "dark")}>{theme === "dark" ? "☀" : "☾"}</button>;
 }
 
-function Login({ onLogin, language, setLanguage, theme, toggleTheme }: { onLogin: () => void; language: Language; setLanguage: (language: Language) => void; theme: Theme; toggleTheme: () => void }) {
+function Login({ onLogin, language, setLanguage, theme, toggleTheme }: { onLogin: (user: api.User) => void; language: Language; setLanguage: (language: Language) => void; theme: Theme; toggleTheme: () => void }) {
   const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  async function submit(event: React.FormEvent) { event.preventDefault(); setError(""); try { await api.login(username, password); onLogin(); } catch (error) { setError((error as Error).message); } }
-  return <main className="login"><div className="login-tools"><LanguageSwitch language={language} setLanguage={setLanguage} /><ThemeButton language={language} theme={theme} toggleTheme={toggleTheme} /></div><section className="card login-card"><div className="brand large">Riego IA<span>●</span><small>LABORATORIO DE AGRONOMÍA v2.1</small></div><h1>{t(language, "loginTitle")}</h1><p>{t(language, "loginDescription")}</p><form onSubmit={submit}><label>{t(language, "username")}<input value={username} onChange={event => setUsername(event.target.value)} required /></label><label>{t(language, "password")}<input type="password" value={password} onChange={event => setPassword(event.target.value)} required /></label>{error && <p className="error">{error}</p>}<button>{t(language, "login")}</button></form></section></main>;
+  async function submit(event: React.FormEvent) { event.preventDefault(); setError(""); try { const user = await api.login(username, password); onLogin(user); } catch (error) { setError((error as Error).message); } }
+  return <main className="login"><div className="login-tools"><LanguageSwitch language={language} setLanguage={setLanguage} /><ThemeButton language={language} theme={theme} toggleTheme={toggleTheme} /></div><section className="card login-card"><div className="brand large">Riego IA<span>●</span><small>LABORATORIO DE AGRONOMÍA v2.1</small></div><h1>{t(language, "loginTitle")}</h1><p>{t(language, "loginDescription")}</p><form onSubmit={submit}><label>{t(language, "username")}<input value={username} onChange={event => setUsername(event.target.value)} required /></label><label>{t(language, "password")}<input type="password" value={password} onChange={event => setPassword(event.target.value)} required /></label><small className="login-role-hint">{language === "es" ? "Administrador: todos los módulos · Usuario lector: solo Predicción" : "Administrator: all modules · Reader user: Prediction only"}</small>{error && <p className="error">{error}</p>}<button>{t(language, "login")}</button></form></section></main>;
 }
 
 function MetricCard({ label: title, value, detail, tone = "light" }: { label: string; value: string; detail: string; tone?: "light" | "green" }) {
@@ -219,6 +219,25 @@ function ReportsPage({ reports, statistics, metrics, metadata, figures }: { repo
 
 type ChatMessage = { id: number; role: "assistant" | "user"; text: string };
 
+type SpeechRecognitionEventLike = Event & { results: ArrayLike<ArrayLike<{ transcript: string }>> };
+type SpeechRecognitionInstance = {
+  lang: string;
+  interimResults: boolean;
+  continuous: boolean;
+  start: () => void;
+  stop: () => void;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  onend: (() => void) | null;
+  onerror: (() => void) | null;
+};
+type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
+declare global {
+  interface Window {
+    SpeechRecognition?: SpeechRecognitionConstructor;
+    webkitSpeechRecognition?: SpeechRecognitionConstructor;
+  }
+}
+
 function assistantReply(question: string, language: Language, pipeline: api.PipelineStatus, dataset?: api.DatasetStatus): string {
   const q = question.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const available = dataset?.available ? (language === "es" ? "El dataset está disponible y validado." : "The dataset is available and validated.") : (language === "es" ? "Todavía no hay un dataset validado." : "There is no validated dataset yet.");
@@ -251,19 +270,70 @@ function ChatBot({ language, pipeline, dataset }: { language: Language; pipeline
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([{ id: 1, role: "assistant", text: t(language, "chatGreeting") }]);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const quickQuestions = [t(language, "quickHow"), t(language, "quickData"), t(language, "quickStats"), t(language, "quickPrediction")];
+  const speechSupported = typeof window !== "undefined" && Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
+  function speak(text: string) {
+    if (!voiceEnabled || typeof window === "undefined" || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = language === "es" ? "es-CO" : "en-US";
+    utterance.rate = 0.98;
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    window.speechSynthesis.speak(utterance);
+  }
   function send(rawQuestion: string) {
     const question = rawQuestion.trim();
     if (!question) return;
-    setMessages(current => [...current, { id: Date.now(), role: "user", text: question }, { id: Date.now() + 1, role: "assistant", text: assistantReply(question, language, pipeline, dataset) }]);
+    const reply = assistantReply(question, language, pipeline, dataset);
+    setMessages(current => [...current, { id: Date.now(), role: "user", text: question }, { id: Date.now() + 1, role: "assistant", text: reply }]);
     setInput("");
+    speak(reply);
   }
   function reset() { setMessages([{ id: Date.now(), role: "assistant", text: t(language, "chatGreeting") }]); }
-  return <div className={`chatbot ${open ? "is-open" : ""}`}><button className="chat-launcher" type="button" onClick={() => setOpen(!open)} aria-label={open ? t(language, "chatClose") : t(language, "chatOpen")}><span>{open ? "×" : "✦"}</span><b>{open ? t(language, "chatClose") : "IA"}</b></button>{open && <section className="chat-panel" aria-label={t(language, "chatTitle")}><header className="chat-header"><div><strong>{t(language, "chatTitle")}</strong><small>{t(language, "assistantHint")}</small></div><button type="button" onClick={reset} title={t(language, "chatReset")}>↺</button></header><div className="chat-messages" aria-live="polite">{messages.map(message => <div className={`chat-message ${message.role}`} key={message.id}>{message.role === "assistant" && <span className="chat-avatar">IA</span>}<p>{message.text}</p></div>)}</div><div className="chat-quick-actions">{quickQuestions.map(question => <button type="button" key={question} onClick={() => send(question)}>{question}</button>)}</div><form className="chat-input" onSubmit={event => { event.preventDefault(); send(input); }}><input value={input} onChange={event => setInput(event.target.value)} placeholder={t(language, "chatPlaceholder")} aria-label={t(language, "chatPlaceholder")} /><button type="submit">{t(language, "send")}</button></form></section>}</div>;
+  function toggleListening() {
+    if (isListening) { recognitionRef.current?.stop(); return; }
+    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Recognition) { setMessages(current => [...current, { id: Date.now(), role: "assistant", text: t(language, "voiceUnavailable") }]); return; }
+    const recognition = new Recognition();
+    recognition.lang = language === "es" ? "es-CO" : "en-US";
+    recognition.interimResults = false;
+    recognition.continuous = false;
+    recognition.onresult = event => {
+      const transcript = event.results[0]?.[0]?.transcript ?? "";
+      setInput(transcript);
+      if (transcript) window.setTimeout(() => send(transcript), 0);
+    };
+    recognition.onend = () => { setIsListening(false); recognitionRef.current = null; };
+    recognition.onerror = () => { setIsListening(false); recognitionRef.current = null; };
+    recognitionRef.current = recognition;
+    setIsListening(true);
+    recognition.start();
+  }
+  function toggleVoice() {
+    setVoiceEnabled(current => {
+      if (current) { window.speechSynthesis?.cancel(); setIsSpeaking(false); }
+      return !current;
+    });
+  }
+  useEffect(() => () => { recognitionRef.current?.stop(); window.speechSynthesis?.cancel(); }, []);
+  useEffect(() => { recognitionRef.current?.stop(); window.speechSynthesis?.cancel(); setIsListening(false); setIsSpeaking(false); }, [language]);
+  return <div className={`chatbot ${open ? "is-open" : ""}`}><button className="chat-launcher" type="button" onClick={() => setOpen(!open)} aria-label={open ? t(language, "chatClose") : t(language, "chatOpen")}><span>{open ? "×" : "✦"}</span><b>{open ? t(language, "chatClose") : "IA"}</b></button>{open && <section className="chat-panel" aria-label={t(language, "chatTitle")}><header className="chat-header"><div><strong>{t(language, "chatTitle")}</strong><small>{t(language, "assistantHint")}</small></div><div className="chat-header-actions"><button type="button" className={voiceEnabled ? "voice-active" : ""} onClick={toggleVoice} title={voiceEnabled ? t(language, "voiceOn") : t(language, "voiceOff")}>{voiceEnabled ? "🔊" : "🔇"}</button><button type="button" onClick={reset} title={t(language, "chatReset")}>↻</button></div></header><div className="chat-messages" aria-live="polite">{messages.map(message => <div className={`chat-message ${message.role}`} key={message.id}>{message.role === "assistant" && <span className="chat-avatar">IA</span>}<div className="chat-bubble"><p>{message.text}</p>{message.role === "assistant" && <button className="chat-speak" type="button" onClick={() => speak(message.text)} title={t(language, "speak")}>🔊</button>}</div></div>)}</div><div className="chat-quick-actions">{quickQuestions.map(question => <button type="button" key={question} onClick={() => send(question)}>{question}</button>)}</div><form className="chat-input" onSubmit={event => { event.preventDefault(); send(input); }}><input value={input} onChange={event => setInput(event.target.value)} placeholder={t(language, "chatPlaceholder")} aria-label={t(language, "chatPlaceholder")} /><button className={`chat-mic ${isListening ? "listening" : ""}`} type="button" onClick={toggleListening} disabled={!speechSupported} title={speechSupported ? (isListening ? t(language, "listening") : t(language, "listen")) : t(language, "voiceUnavailable")}>{isListening ? "⏹" : "🎙"}</button><button type="submit">{t(language, "send")}</button></form>{isSpeaking && <small className="chat-speaking">{language === "es" ? "Reproduciendo respuesta…" : "Playing response…"}</small>}</section>}</div>;
+}
+
+function ReaderView({ user, language, setLanguage, theme, toggleTheme, metadata, onLogout }: { user: api.User; language: Language; setLanguage: (language: Language) => void; theme: Theme; toggleTheme: () => void; metadata: Row; onLogout: () => void }) {
+  const readerPipeline = { ...initialPipeline, status: "completed", stage: "ready", progress: 100, message: t(language, "readyForPrediction") };
+  return <div className="app-shell reader-shell"><aside className="sidebar"><div className="lab-brand"><strong>Riego IA</strong><span>LABORATORIO DE AGRONOMÍA v2.1</span></div><div className="reader-badge">{t(language, "readerOnly")}</div><nav><button className="active"><i>⌁</i>{t(language, "navPredict")}</button></nav><div className="user-card"><b>{user.username.slice(0, 2).toUpperCase()}</b><div><strong>{user.username}</strong><span>{language === "es" ? "Usuario lector" : "Reader user"}</span></div></div><button className="sidebar-logout" type="button" onClick={onLogout}>{t(language, "logout")}</button></aside><div className="app-main"><header className="topbar"><strong>{t(language, "readerTitle")}</strong><span className="online"><i /> {t(language, "online")}</span><div className="topbar-controls"><LanguageSwitch language={language} setLanguage={setLanguage} /><ThemeButton language={language} theme={theme} toggleTheme={toggleTheme} /></div></header><main className="page-content"><section className="reader-welcome"><div><span className="breadcrumb">{t(language, "readerOnly")}</span><h1>{t(language, "readerTitle")}</h1><p>{t(language, "readerSubtitle")}. {language === "es" ? "Los cálculos internos ya fueron realizados por el laboratorio." : "Internal calculations were already completed by the laboratory."}</p></div><div className="reader-status"><span>●</span><strong>{t(language, "readyForPrediction")}</strong><small>{String(metadata.model_name ?? "Modelo persistido")}</small></div></section><div className="metric-grid three reader-metrics"><MetricCard label={language === "es" ? "Modelo recomendado" : "Recommended model"} value={String(metadata.model_name ?? "—")} detail={language === "es" ? "Seleccionado por rendimiento" : "Selected by performance"} tone="green" /><MetricCard label={language === "es" ? "Versión" : "Version"} value={String(metadata.model_version ?? "H5")} detail={language === "es" ? "Artefacto persistido" : "Persisted artifact"} /><MetricCard label={language === "es" ? "Estado" : "Status"} value={language === "es" ? "Listo" : "Ready"} detail={language === "es" ? "Sin reentrenamiento" : "No retraining required"} /></div><PredictionPage metadata={metadata} /></main><footer className="footer"><span>{t(language, "footer")}</span><span>{t(language, "footerRight")}</span></footer><ChatBot language={language} pipeline={readerPipeline} /></div></div>;
 }
 
 function App() {
   const [logged, setLogged] = useState(Boolean(sessionStorage.getItem("irrigation_token")));
+  const [currentUser, setCurrentUser] = useState<api.User | null>(() => { try { const raw = sessionStorage.getItem("irrigation_user"); return raw ? JSON.parse(raw) as api.User : null; } catch { return null; } });
   const [language, setLanguage] = useState<Language>(() => (localStorage.getItem("irrigation_language") as Language | null) ?? "es");
   const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem("irrigation_theme") as Theme | null) ?? "light");
   const [page, setPage] = useState<Page>("dashboard");
@@ -276,9 +346,14 @@ function App() {
   const [metadata, setMetadata] = useState<Row>({});
   const [figures, setFigures] = useState<Figure[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
-  const refresh = async () => { try { const [dataResult, pipelineResult, metricResult, cvResult, tuningResult, statisticsResult, figureResult] = await Promise.all([api.status(), api.trainStatus(), api.metrics(), api.cv(), api.tuning(), api.statistics(), api.figures()]); setDataset(dataResult); setPipeline(pipelineResult); setMetrics(metricResult.models); setCv(cvResult.rows); setTuning(tuningResult); setStatistics(statisticsResult); setFigures(figureResult.figures); try { setMetadata(await api.modelMetadata()); } catch { setMetadata({}); } try { setReports((await api.reports()).reports); } catch { setReports([]); } } catch (error) { if ((error as Error).message === "AUTH_EXPIRED") { api.logout(); setLogged(false); } } };
-  useEffect(() => { if (logged) void refresh(); }, [logged]);
-  useEffect(() => { if (!logged) return; const timer = window.setInterval(() => void refresh(), 2500); return () => window.clearInterval(timer); }, [logged]);
+  useEffect(() => { if (!logged) { setCurrentUser(null); return; } void api.me().then(setCurrentUser).catch(error => { if ((error as Error).message === "AUTH_EXPIRED") { api.logout(); setLogged(false); } }); }, [logged]);
+  const refresh = async () => {
+    if (!currentUser) return;
+    if (!currentUser.is_admin) { try { setMetadata(await api.modelMetadata()); } catch { setMetadata({}); } return; }
+    try { const [dataResult, pipelineResult, metricResult, cvResult, tuningResult, statisticsResult, figureResult] = await Promise.all([api.status(), api.trainStatus(), api.metrics(), api.cv(), api.tuning(), api.statistics(), api.figures()]); setDataset(dataResult); setPipeline(pipelineResult); setMetrics(metricResult.models); setCv(cvResult.rows); setTuning(tuningResult); setStatistics(statisticsResult); setFigures(figureResult.figures); try { setMetadata(await api.modelMetadata()); } catch { setMetadata({}); } try { setReports((await api.reports()).reports); } catch { setReports([]); } } catch (error) { if ((error as Error).message === "AUTH_EXPIRED") { api.logout(); setLogged(false); } }
+  };
+  useEffect(() => { if (logged && currentUser) void refresh(); }, [logged, currentUser]);
+  useEffect(() => { if (!logged || !currentUser) return; const timer = window.setInterval(() => void refresh(), 2500); return () => window.clearInterval(timer); }, [logged, currentUser]);
   useEffect(() => { localStorage.setItem("irrigation_language", language); document.documentElement.lang = language; }, [language]);
   useEffect(() => { localStorage.setItem("irrigation_theme", theme); document.documentElement.dataset.theme = theme; }, [theme]);
   useEffect(() => {
@@ -313,10 +388,13 @@ function App() {
   }, [language]);
   async function start(fast: boolean, folds: number, trials: number) { try { await api.runPipeline(fast, folds, trials); setPage("training"); await refresh(); } catch (error) { window.alert((error as Error).message); } }
   async function cancel() { try { await api.cancelPipeline(); await refresh(); } catch (error) { window.alert((error as Error).message); } }
-  if (!logged) return <Login onLogin={() => setLogged(true)} language={language} setLanguage={setLanguage} theme={theme} toggleTheme={() => setTheme(current => current === "dark" ? "light" : "dark")} />;
+  function logout() { api.logout(); setCurrentUser(null); setLogged(false); setPage("dashboard"); }
+  if (!logged) return <Login onLogin={user => { setCurrentUser(user); setLogged(true); }} language={language} setLanguage={setLanguage} theme={theme} toggleTheme={() => setTheme(current => current === "dark" ? "light" : "dark")} />;
+  if (!currentUser) return <main className="session-loading"><p>{t(language, "loadingSession")}</p></main>;
+  if (!currentUser.is_admin) return <ReaderView user={currentUser} language={language} setLanguage={setLanguage} theme={theme} toggleTheme={() => setTheme(current => current === "dark" ? "light" : "dark")} metadata={metadata} onLogout={logout} />;
   const nav: [Page, string][] = [["dashboard", t(language, "navDashboard")], ["eda", t(language, "navEda")], ["training", t(language, "navTraining")], ["cv", t(language, "navCv")], ["tuning", t(language, "navTuning")], ["statistics", t(language, "navStatistics")], ["reports", t(language, "navReports")], ["predict", t(language, "navPredict")]];
   const toggleTheme = () => setTheme(current => current === "dark" ? "light" : "dark");
-  return <div className="app-shell"><aside className="sidebar"><div className="lab-brand"><strong>Riego IA</strong><span>LABORATORIO DE AGRONOMÍA v2.1</span></div><div className="nav-label">{language === "es" ? "MÓDULOS PRINCIPALES" : "MAIN MODULES"}</div><nav>{nav.map(([id, title]) => { const locked = ["cv", "tuning", "statistics", "reports", "predict"].includes(id) && pipeline.status !== "completed"; return <button key={id} className={page === id ? "active" : ""} disabled={locked} onClick={() => setPage(id)}><i>{id === "dashboard" ? "▦" : id === "eda" ? "↥" : id === "training" ? "◉" : id === "cv" ? "↝" : id === "tuning" ? "⌘" : id === "statistics" ? "∑" : id === "reports" ? "▥" : "⌁"}</i>{title}{locked && <small>{t(language, "locked")}</small>}</button>; })}</nav><div className="user-card"><b>AL</b><div><strong>{t(language, "admin")}</strong><span>{t(language, "role")}</span></div></div></aside><div className="app-main"><header className="topbar"><strong>{t(language, "appName")}</strong><span className="online"><i /> {t(language, "online")}</span><input className="search" placeholder={t(language, "search")} /><div className="topbar-controls"><LanguageSwitch language={language} setLanguage={setLanguage} /><ThemeButton language={language} theme={theme} toggleTheme={toggleTheme} /></div></header><main className="page-content">{page === "dashboard" && <DashboardPage dataset={dataset} pipeline={pipeline} metrics={metrics} onStart={start} onCancel={cancel} go={setPage} />}{page === "eda" && <EdaPage dataset={dataset} onRefresh={refresh} go={setPage} />}{page === "training" && <TrainingPage pipeline={pipeline} metrics={metrics} figures={figures} metadata={metadata} onStart={start} onCancel={cancel} />}{page === "cv" && <CrossValidationPage rows={cv} onStart={start} />}{page === "tuning" && <TuningPage tuning={tuning} onStart={start} />}{page === "statistics" && <StatisticsPage statistics={statistics} />}{page === "reports" && <ReportsPage reports={reports} statistics={statistics} metrics={metrics} metadata={metadata} figures={figures} />}{page === "predict" && <PredictionPage metadata={metadata} />}</main><footer className="footer"><span>{t(language, "footer")}</span><span>{t(language, "footerRight")}</span></footer><ChatBot language={language} pipeline={pipeline} dataset={dataset} /></div></div>;
+  return <div className="app-shell"><aside className="sidebar"><div className="lab-brand"><strong>Riego IA</strong><span>LABORATORIO DE AGRONOMÍA v2.1</span></div><div className="nav-label">{language === "es" ? "MÓDULOS PRINCIPALES" : "MAIN MODULES"}</div><nav>{nav.map(([id, title]) => { const locked = ["cv", "tuning", "statistics", "reports", "predict"].includes(id) && pipeline.status !== "completed"; return <button key={id} className={page === id ? "active" : ""} disabled={locked} onClick={() => setPage(id)}><i>{id === "dashboard" ? "▦" : id === "eda" ? "↥" : id === "training" ? "◉" : id === "cv" ? "↝" : id === "tuning" ? "⌘" : id === "statistics" ? "∑" : id === "reports" ? "▥" : "⌁"}</i>{title}{locked && <small>{t(language, "locked")}</small>}</button>; })}</nav><div className="user-card"><b>{currentUser.username.slice(0, 2).toUpperCase()}</b><div><strong>{currentUser.username}</strong><span>{t(language, "admin")}</span></div></div><button className="sidebar-logout" type="button" onClick={logout}>{t(language, "logout")}</button></aside><div className="app-main"><header className="topbar"><strong>{t(language, "appName")}</strong><span className="online"><i /> {t(language, "online")}</span><input className="search" placeholder={t(language, "search")} /><div className="topbar-controls"><LanguageSwitch language={language} setLanguage={setLanguage} /><ThemeButton language={language} theme={theme} toggleTheme={toggleTheme} /></div></header><main className="page-content">{page === "dashboard" && <DashboardPage dataset={dataset} pipeline={pipeline} metrics={metrics} onStart={start} onCancel={cancel} go={setPage} />}{page === "eda" && <EdaPage dataset={dataset} onRefresh={refresh} go={setPage} />}{page === "training" && <TrainingPage pipeline={pipeline} metrics={metrics} figures={figures} metadata={metadata} onStart={start} onCancel={cancel} />}{page === "cv" && <CrossValidationPage rows={cv} onStart={start} />}{page === "tuning" && <TuningPage tuning={tuning} onStart={start} />}{page === "statistics" && <StatisticsPage statistics={statistics} />}{page === "reports" && <ReportsPage reports={reports} statistics={statistics} metrics={metrics} metadata={metadata} figures={figures} />}{page === "predict" && <PredictionPage metadata={metadata} />}</main><footer className="footer"><span>{t(language, "footer")}</span><span>{t(language, "footerRight")}</span></footer><ChatBot language={language} pipeline={pipeline} dataset={dataset} /></div></div>;
 }
 
 export default App;

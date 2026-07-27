@@ -284,6 +284,59 @@ html[data-theme="dark"] .chat-input input { background: #102029; color: #e5eeee;
 html[data-theme="dark"] .login { background: radial-gradient(circle at 10% 20%, #1d5144, transparent 38%), #0e171e; }
 @media (max-width: 780px) { .topbar-controls { margin-left: auto; } .chatbot { right: 12px; bottom: 12px; } .chat-panel { max-height: calc(100vh - 90px); } }
 
+/* Roles, voz y contraste semántico. */
+.reader-badge { margin: 12px 10px 8px; padding: 8px 10px; border: 1px solid rgba(188, 235, 208, .28); border-radius: 8px; color: #bcebd0; font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+.sidebar-logout { width: calc(100% - 20px); margin: 12px 10px 0; padding: .62rem .7rem; border: 1px solid rgba(188, 235, 208, .28); border-radius: 7px; background: rgba(255, 255, 255, .07); color: #eafff5; font-size: .68rem; font-weight: 800; }
+.sidebar-logout:hover { background: #bcebd0; color: #064c3f; }
+.login-role-hint { display: block; margin: -2px 0 10px; color: #61767c; font-size: .66rem; line-height: 1.45; }
+.session-loading { display: grid; place-items: center; min-height: 100vh; background: #f4f8fb; color: #123548; font-weight: 700; }
+.reader-welcome { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, .4fr); align-items: center; gap: 24px; margin-bottom: 16px; padding: 26px 28px; border: 1px solid #cde7de; border-radius: 14px; background: linear-gradient(135deg, #e7f8f0, #f8fcff); box-shadow: 0 12px 30px rgba(31, 91, 77, .08); }
+.reader-welcome h1 { margin: 7px 0 5px; color: #103d3d; font-size: clamp(1.65rem, 3vw, 2.35rem); }
+.reader-welcome p { max-width: 680px; margin: 0; color: #4c6871; font-size: .84rem; line-height: 1.55; }
+.reader-status { display: grid; gap: 6px; padding: 18px; border-radius: 11px; background: #075543; color: #f3fff8; }
+.reader-status span { color: #bcebd0; font-size: 1.25rem; line-height: 1; }
+.reader-status strong { font-size: .85rem; }
+.reader-status small { color: #bcebd0; font-size: .68rem; overflow-wrap: anywhere; }
+.reader-metrics { margin-bottom: 18px; }
+.chat-header-actions { display: flex; align-items: center; gap: 5px; }
+.chat-input { grid-template-columns: minmax(0, 1fr) auto auto; }
+.chat-header-actions button { display: grid; place-items: center; }
+.chat-header-actions button.voice-active { background: rgba(188, 235, 208, .18); }
+.chat-bubble { display: flex; align-items: flex-start; gap: 5px; min-width: 0; padding: 0; border-radius: 11px 11px 11px 3px; background: #fff; box-shadow: 0 2px 8px rgba(28, 64, 75, .06); }
+.chat-bubble p { box-shadow: none; }
+.chat-speak { flex: 0 0 auto; margin: 6px 5px 0 0; padding: 3px; border-radius: 5px; background: transparent; color: #14816d; font-size: .7rem; }
+.chat-speak:hover { background: #e2f5ed; }
+.chat-mic { min-width: 35px; padding-inline: .45rem !important; }
+.chat-mic.listening { background: #a44355 !important; animation: voicePulse 1s ease-in-out infinite; }
+.chat-mic:disabled { opacity: .45; cursor: not-allowed; }
+.chat-speaking { display: block; padding: 0 12px 8px; background: #fff; color: #087360; font-size: .6rem; }
+@keyframes voicePulse { 50% { box-shadow: 0 0 0 4px rgba(164, 67, 85, .18); } }
+
+html[data-theme="light"] body, html[data-theme="light"] .app-shell { color: #173343; }
+html[data-theme="light"] .page-content h1, html[data-theme="light"] .page-content h2, html[data-theme="light"] .page-content h3, html[data-theme="light"] .page-content h4, html[data-theme="light"] .section-heading h2, html[data-theme="light"] .section-title h3 { color: #142d3d !important; }
+html[data-theme="light"] .page-content p, html[data-theme="light"] .page-content label, html[data-theme="light"] .page-content .muted, html[data-theme="light"] .page-content .notice { color: #526b78 !important; }
+html[data-theme="light"] .card, html[data-theme="light"] .metric-card, html[data-theme="light"] .model-card, html[data-theme="light"] .table-card, html[data-theme="light"] .figure-card { background: #ffffff; color: #173343; border-color: #d9e7eb; }
+html[data-theme="light"] input, html[data-theme="light"] select { background: #ffffff; color: #173343; border-color: #c6d9df; }
+html[data-theme="light"] input::placeholder { color: #71858e; }
+html[data-theme="light"] .chat-panel, html[data-theme="light"] .chat-quick-actions, html[data-theme="light"] .chat-input, html[data-theme="light"] .chat-speaking { background: #ffffff; color: #173343; }
+html[data-theme="light"] .chat-message p { color: #244957; }
+
+html[data-theme="dark"] .page-content h1, html[data-theme="dark"] .page-content h2, html[data-theme="dark"] .page-content h3, html[data-theme="dark"] .page-content h4, html[data-theme="dark"] .section-heading h2, html[data-theme="dark"] .section-title h3, html[data-theme="dark"] .reader-welcome h1 { color: #f0fffb !important; }
+html[data-theme="dark"] .page-content p, html[data-theme="dark"] .page-content label, html[data-theme="dark"] .page-content .muted, html[data-theme="dark"] .page-content .notice, html[data-theme="dark"] .tuning-controls small, html[data-theme="dark"] .batch-card p { color: #c6d9dc !important; }
+html[data-theme="dark"] .card, html[data-theme="dark"] .metric-card, html[data-theme="dark"] .model-card, html[data-theme="dark"] .table-card, html[data-theme="dark"] .figure-card, html[data-theme="dark"] .reader-welcome { background: #172831; color: #eaf8f6; border-color: #34515b; }
+html[data-theme="dark"] input, html[data-theme="dark"] select { background: #102029; color: #f0fffb; border-color: #41616b; }
+html[data-theme="dark"] input::placeholder { color: #91adb4; }
+html[data-theme="dark"] .reader-welcome { background: linear-gradient(135deg, #183d3a, #172831); }
+html[data-theme="dark"] .reader-welcome p, html[data-theme="dark"] .reader-status small { color: #c6e5db !important; }
+html[data-theme="dark"] .chat-bubble { background: #1d3540; }
+html[data-theme="dark"] .chat-bubble p { background: transparent; color: #e5f4f2; }
+html[data-theme="dark"] .chat-speak:hover { background: #274b4a; }
+html[data-theme="dark"] .chat-speaking { background: #172831; color: #bcebd0; }
+html[data-theme="dark"] .login-role-hint { color: #b5c9cc; }
+html[data-theme="dark"] .session-loading { background: #0e171e; color: #effff9; }
+
+@media (max-width: 780px) { .reader-welcome { grid-template-columns: 1fr; padding: 20px; } .reader-status { max-width: none; } }
+
 /* Acabado visual: superficies suaves, contraste y estados interactivos. */
 .app-shell { background: linear-gradient(135deg, #f5f9fc 0%, #eef7f4 55%, #f8fbff 100%); }
 .page-content { position: relative; }

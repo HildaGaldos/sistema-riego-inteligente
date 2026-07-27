@@ -34,6 +34,17 @@ npm run dev
 
 Abra `http://localhost:5173` en el navegador. Ingrese con el usuario y la contraseña definidos en el archivo `.env`.
 
+### Roles de acceso
+
+El sistema tiene dos roles:
+
+- **Administrador:** puede cargar el dataset, limpiar datos, entrenar modelos, ejecutar validación cruzada, tuning, pruebas estadísticas, reportes y predicción.
+- **Usuario lector:** solo ve el Centro de predicción. No recibe en la interfaz ni en la API acceso a dataset, limpieza, transformación, entrenamiento, validación, pruebas o reportes.
+
+Configure el segundo usuario en `.env` con `IRRIGATION_READER_USER` y `IRRIGATION_READER_PASSWORD`. En Render, agregue esas mismas variables en el servicio de la API. El usuario lector recibe resultados del modelo persistido y puede realizar predicciones individuales o por lote sin reentrenar.
+
+El asistente flotante acepta texto y, en navegadores compatibles como Chrome o Edge, permite pulsar el micrófono para dictar preguntas y escuchar las respuestas. La voz usa las capacidades gratuitas del navegador; no envía el audio a un servicio externo.
+
 ## 3. Flujo recomendado
 
 Siga siempre este orden:

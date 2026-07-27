@@ -4,6 +4,7 @@ export type DatasetStatus = { available: boolean; filename?: string; message?: s
 export type Prediction = { probability_irrigation: number; predicted_class: number; recommendation: string; threshold: number; model_name: string; model_version: string };
 export type PipelineStage = { id: string; label: string };
 export type PipelineStatus = { status: string; stage: string; progress: number; message: string; detail?: string; elapsed_seconds?: number; eta_seconds?: number | null; stages?: PipelineStage[]; history?: { stage: string; progress: number; message: string; detail?: string; at?: string }[]; error?: string; result?: { model_name?: string; rows?: number; excluded_rows?: number; folds?: number } };
+export type User = { username: string; is_admin: boolean; role: "admin" | "reader" };
 
 function authHeaders(): HeadersInit {
   const token = sessionStorage.getItem("irrigation_token");
@@ -25,10 +26,12 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 
 export async function login(username: string, password: string) {
   const body = new URLSearchParams({ username, password });
-  const result = await request<{ access_token: string }>("/auth/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body });
+  const result = await request<{ access_token: string } & User>("/auth/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body });
   sessionStorage.setItem("irrigation_token", result.access_token);
+  sessionStorage.setItem("irrigation_user", JSON.stringify(result));
+  return result;
 }
-export const me = () => request<{ username: string; is_admin: boolean }>("/auth/me");
+export const me = () => request<User>("/auth/me");
 export const status = () => request<DatasetStatus>("/data/status");
 export const upload = (file: File) => { const form = new FormData(); form.append("file", file); return request<Record<string, unknown>>("/data/upload", { method: "POST", body: form }); };
 export const train = (fast: boolean, folds = 5, tuningTrials?: number) => request<Record<string, unknown>>(`/train?fast=${fast}&folds=${folds}${tuningTrials ? `&tuning_trials=${tuningTrials}` : ""}`, { method: "POST" });
@@ -60,4 +63,4 @@ export async function downloadReport(filename: string): Promise<Blob> {
   if (!response.ok) throw new Error("No fue posible descargar el reporte");
   return response.blob();
 }
-export const logout = () => sessionStorage.removeItem("irrigation_token");
+export const logout = () => { sessionStorage.removeItem("irrigation_token"); sessionStorage.removeItem("irrigation_user"); };
