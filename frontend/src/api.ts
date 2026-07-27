@@ -5,6 +5,7 @@ export type Prediction = { probability_irrigation: number; predicted_class: numb
 export type PipelineStage = { id: string; label: string };
 export type PipelineStatus = { status: string; stage: string; progress: number; message: string; detail?: string; elapsed_seconds?: number; eta_seconds?: number | null; stages?: PipelineStage[]; history?: { stage: string; progress: number; message: string; detail?: string; at?: string }[]; error?: string; result?: { model_name?: string; rows?: number; excluded_rows?: number; folds?: number } };
 export type User = { username: string; is_admin: boolean; role: "admin" | "reader" };
+export type ReaderResults = { available: boolean; metadata: Record<string, unknown>; quality: Record<string, unknown>; metrics: { available: boolean; models: Record<string, unknown>[] }; cross_validation: { available: boolean; rows: Record<string, unknown>[] }; statistics: Record<string, unknown>; figures: { filename: string; size: number }[] };
 
 function authHeaders(): HeadersInit {
   const token = sessionStorage.getItem("irrigation_token");
@@ -52,6 +53,7 @@ export async function downloadFigure(filename: string): Promise<Blob> {
   return response.blob();
 }
 export const modelMetadata = () => request<Record<string, unknown>>("/model/metadata");
+export const readerResults = () => request<ReaderResults>("/reader/results");
 export async function downloadModel(filename = "best_irrigation_model.h5"): Promise<Blob> {
   const response = await fetch(`${API_URL}/model/artifacts/${encodeURIComponent(filename)}`, { headers: authHeaders() });
   if (!response.ok) throw new Error("No fue posible descargar el modelo");

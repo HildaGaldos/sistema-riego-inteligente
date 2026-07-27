@@ -1,0 +1,5 @@
+{
+  "value": 0.5,
+  "method": "fixed_initial_threshold",
+  "optimized_on": "none"
+}

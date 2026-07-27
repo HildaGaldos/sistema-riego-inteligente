@@ -185,6 +185,47 @@ def model_metadata(user: dict = Depends(current_user)):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+@app.get("/reader/results")
+def reader_results(user: dict = Depends(current_user)):
+    """Return a safe, read-only snapshot of the completed analysis for readers."""
+
+    root = Path(ARTIFACTS_DIR)
+    metadata_path = root / "models" / "model_metadata.json"
+    quality_path = root / "metrics" / "data_quality.json"
+    metrics_path = root / "metrics" / "model_comparison.csv"
+    cv_path = root / "metrics" / "cv_results.csv"
+    statistics_path = root / "metrics" / "statistical_tests.json"
+
+    def read_json(path: Path) -> dict:
+        if not path.exists():
+            return {}
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return {}
+
+    def read_csv(path: Path) -> list[dict]:
+        if not path.exists():
+            return []
+        try:
+            import pandas as pd
+            return json.loads(pd.read_csv(path).to_json(orient="records"))
+        except (OSError, ValueError, ImportError):
+            return []
+
+    figures_root = root / "figures"
+    figures = [{"filename": path.name, "size": path.stat().st_size} for path in sorted(figures_root.glob("*.png"))]
+    return {
+        "available": predictor.available and metadata_path.exists(),
+        "metadata": read_json(metadata_path),
+        "quality": read_json(quality_path),
+        "metrics": {"available": bool(read_csv(metrics_path)), "models": read_csv(metrics_path)},
+        "cross_validation": {"available": bool(read_csv(cv_path)), "rows": read_csv(cv_path)},
+        "statistics": read_json(statistics_path),
+        "figures": figures,
+    }
+
+
 @app.get("/model/artifacts/{filename}")
 def model_artifact(filename: str, user: dict = Depends(require_admin)):
     """Download the persisted best model without launching training again."""
@@ -222,7 +263,7 @@ def eda_figures(user: dict = Depends(require_admin)):
 
 
 @app.get("/eda/figures/{filename}")
-def eda_figure(filename: str, user: dict = Depends(require_admin)):
+def eda_figure(filename: str, user: dict = Depends(current_user)):
     root = (Path(ARTIFACTS_DIR) / "figures").resolve()
     path = (root / Path(filename).name).resolve()
     if path.parent != root or not path.exists():

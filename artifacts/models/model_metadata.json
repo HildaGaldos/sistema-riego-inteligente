@@ -1,0 +1,131 @@
+{
+  "model_name": "MLP",
+  "model_version": "20260720-102331",
+  "seed": 42,
+  "folds": 5,
+  "requested_folds": 5,
+  "fast_mode": false,
+  "epochs": 30,
+  "feature_columns": [
+    "temperature",
+    "humidity",
+    "moi",
+    "soil_type",
+    "crop_stage",
+    "crop_id"
+  ],
+  "metrics": {
+    "accuracy": 0.9990189666448659,
+    "precision": 0.9975961538461539,
+    "recall": 1.0,
+    "specificity": 0.9983452840595698,
+    "f1": 0.9987966305655837,
+    "roc_auc": 0.9999924684950503,
+    "pr_auc": 0.9999890146867069,
+    "log_loss": 0.005454923026263714,
+    "balanced_accuracy": 0.9991726420297848,
+    "mcc": 0.9979706486607073,
+    "brier_score": 0.0010732169030234218,
+    "threshold": 0.5,
+    "n": 3058,
+    "model": "MLP",
+    "training_seconds": 16.75697240000045,
+    "inference_seconds_per_row": 6.839267495098225e-05,
+    "inference_p50_seconds": 0.0875432500001807,
+    "inference_p95_seconds": 0.1810229849997541,
+    "parameters": 3649,
+    "artifact_bytes": 0,
+    "cv_f1_mean": 0.9986953331637629,
+    "cv_f1_std": 0.0009117211189392219,
+    "cv_roc_auc_mean": 0.9999889252741984,
+    "cv_recall_mean": 0.9987959863526322,
+    "bootstrap_f1": {
+      "lower": 0.9972233240777469,
+      "upper": 1.0
+    },
+    "bootstrap_roc_auc": {
+      "lower": 0.9999770016268908,
+      "upper": 1.0
+    }
+  },
+  "platform": "Windows-11-10.0.22621-SP0",
+  "tuning": {
+    "MLP": {
+      "backend": "optuna",
+      "trials": 43,
+      "best_value": 1.0,
+      "best_params": {
+        "learning_rate": 0.002937596478144737,
+        "dropout": 0.23491662312533376,
+        "filters": 64,
+        "lstm_units": 32,
+        "rbf_centers": 8,
+        "rbf_gamma": 0.10213470755997708
+      }
+    },
+    "DNN": {
+      "backend": "optuna",
+      "trials": 43,
+      "best_value": 0.9888438133874239,
+      "best_params": {
+        "learning_rate": 0.0007564437484067142,
+        "dropout": 0.13227575041666362,
+        "filters": 32,
+        "lstm_units": 64,
+        "rbf_centers": 16,
+        "rbf_gamma": 0.40173022385787144
+      }
+    },
+    "RBF": {
+      "backend": "optuna",
+      "trials": 43,
+      "best_value": 0.997491219267436,
+      "best_params": {
+        "learning_rate": 0.002896930728128733,
+        "dropout": 0.13132975261445518,
+        "filters": 16,
+        "lstm_units": 32,
+        "rbf_centers": 32,
+        "rbf_gamma": 0.8277964116813652
+      }
+    },
+    "CNN_MLP": {
+      "backend": "optuna",
+      "trials": 43,
+      "best_value": 0.9562653562653562,
+      "best_params": {
+        "learning_rate": 0.0005696757509954566,
+        "dropout": 0.07360325782730742,
+        "filters": 64,
+        "lstm_units": 32,
+        "rbf_centers": 32,
+        "rbf_gamma": 0.12453512108426532
+      }
+    },
+    "LSTM_MLP": {
+      "backend": "optuna",
+      "trials": 24,
+      "best_value": 0.9515810276679841,
+      "best_params": {
+        "learning_rate": 0.0020266108962436083,
+        "dropout": 0.055827875931737964,
+        "filters": 16,
+        "lstm_units": 64,
+        "rbf_centers": 8,
+        "rbf_gamma": 0.5268125170379779
+      }
+    }
+  },
+  "artifact_files": [
+    "best_irrigation_model.h5",
+    "best_irrigation_model.keras",
+    "preprocessor.joblib",
+    "threshold.json"
+  ],
+  "statistical_tests": [
+    "t_student_pareada",
+    "friedman",
+    "wilcoxon_holm",
+    "mcnemar"
+  ]
+}

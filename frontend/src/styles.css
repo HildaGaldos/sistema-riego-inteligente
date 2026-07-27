@@ -336,6 +336,27 @@ html[data-theme="dark"] .login-role-hint { color: #b5c9cc; }
 html[data-theme="dark"] .session-loading { background: #0e171e; color: #effff9; }
 
 @media (max-width: 780px) { .reader-welcome { grid-template-columns: 1fr; padding: 20px; } .reader-status { max-width: none; } }
+.reader-analysis { display: grid; gap: 16px; }
+.reader-analysis .section-heading { margin-top: 6px; }
+.reader-result-card { overflow: hidden; }
+.reader-result-card .table-wrap { max-height: 360px; overflow: auto; }
+.reader-result-card table { min-width: 720px; }
+.reader-result-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.reader-quality-card { display: grid; align-content: start; gap: 8px; min-height: 150px; }
+.reader-quality-card h3, .reader-quality-card p { margin: 0; }
+.reader-quality-card p { line-height: 1.5; }
+.reader-quality-list { display: grid; gap: 8px; margin-top: 5px; }
+.reader-quality-list span { padding: 9px 10px; border-radius: 6px; background: #f1f8f5; color: #557179; font-size: .7rem; }
+.reader-quality-list b { margin-right: 5px; color: #087360; font-size: .9rem; }
+.reader-model-version { color: #087360; font-size: .8rem; }
+.reader-warning { display: grid; gap: 7px; border-left: 4px solid #d19a2b; background: #fff9e8; color: #634d1c; }
+.reader-warning span { color: #7b683b; font-size: .75rem; line-height: 1.5; }
+.reader-statistics > section { display: grid; gap: 16px; }
+html[data-theme="dark"] .reader-quality-list span { background: #1d3b3b; color: #c6d9dc; }
+html[data-theme="dark"] .reader-quality-list b, html[data-theme="dark"] .reader-model-version { color: #bcebd0; }
+html[data-theme="dark"] .reader-warning { background: #3a321f; color: #ffe9a5; border-color: #d6a841; }
+html[data-theme="dark"] .reader-warning span { color: #efd98b !important; }
+@media (max-width: 780px) { .reader-result-grid { grid-template-columns: 1fr; } }
 
 /* Acabado visual: superficies suaves, contraste y estados interactivos. */
 .app-shell { background: linear-gradient(135deg, #f5f9fc 0%, #eef7f4 55%, #f8fbff 100%); }

@@ -1,0 +1,67 @@
+{
+  "MLP": {
+    "backend": "optuna",
+    "trials": 43,
+    "best_value": 1.0,
+    "best_params": {
+      "learning_rate": 0.002937596478144737,
+      "dropout": 0.23491662312533376,
+      "filters": 64,
+      "lstm_units": 32,
+      "rbf_centers": 8,
+      "rbf_gamma": 0.10213470755997708
+    }
+  },
+  "DNN": {
+    "backend": "optuna",
+    "trials": 43,
+    "best_value": 0.9888438133874239,
+    "best_params": {
+      "learning_rate": 0.0007564437484067142,
+      "dropout": 0.13227575041666362,
+      "filters": 32,
+      "lstm_units": 64,
+      "rbf_centers": 16,
+      "rbf_gamma": 0.40173022385787144
+    }
+  },
+  "RBF": {
+    "backend": "optuna",
+    "trials": 43,
+    "best_value": 0.997491219267436,
+    "best_params": {
+      "learning_rate": 0.002896930728128733,
+      "dropout": 0.13132975261445518,
+      "filters": 16,
+      "lstm_units": 32,
+      "rbf_centers": 32,
+      "rbf_gamma": 0.8277964116813652
+    }
+  },
+  "CNN_MLP": {
+    "backend": "optuna",
+    "trials": 43,
+    "best_value": 0.9562653562653562,
+    "best_params": {
+      "learning_rate": 0.0005696757509954566,
+      "dropout": 0.07360325782730742,
+      "filters": 64,
+      "lstm_units": 32,
+      "rbf_centers": 32,
+      "rbf_gamma": 0.12453512108426532
+    }
+  },
+  "LSTM_MLP": {
+    "backend": "optuna",
+    "trials": 24,
+    "best_value": 0.9515810276679841,
+    "best_params": {
+      "learning_rate": 0.0020266108962436083,
+      "dropout": 0.055827875931737964,
+      "filters": 16,
+      "lstm_units": 64,
+      "rbf_centers": 8,
+      "rbf_gamma": 0.5268125170379779
+    }
+  }
+}

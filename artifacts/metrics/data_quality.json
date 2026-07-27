@@ -1,0 +1,70 @@
+{
+  "rows": 15289,
+  "rows_excluded": 0,
+  "columns": 7,
+  "duplicates": 128,
+  "missing_by_column": {
+    "crop_id": 0,
+    "soil_type": 0,
+    "crop_stage": 0,
+    "moi": 0,
+    "temperature": 0,
+    "humidity": 0,
+    "result": 0
+  },
+  "dtypes": {
+    "crop_id": "object",
+    "soil_type": "object",
+    "crop_stage": "object",
+    "moi": "int64",
+    "temperature": "int64",
+    "humidity": "float64",
+    "result": "int64"
+  },
+  "class_distribution": {
+    "0": 9062,
+    "1": 6227
+  },
+  "numeric_describe": {
+    "temperature": {
+      "count": 15289.0,
+      "mean": 28.350121002,
+      "std": 9.7341788954,
+      "min": 13.0,
+      "25%": 20.0,
+      "50%": 28.0,
+      "75%": 37.0,
+      "max": 46.0
+    },
+    "humidity": {
+      "count": 15289.0,
+      "mean": 64.5240630519,
+      "std": 22.5701886182,
+      "min": 15.0,
+      "25%": 46.0,
+      "50%": 71.0,
+      "75%": 84.0,
+      "max": 91.0
+    },
+    "moi": {
+      "count": 15289.0,
+      "mean": 41.9386487017,
+      "std": 27.0886030607,
+      "min": 1.0,
+      "25%": 19.0,
+      "50%": 39.0,
+      "75%": 61.0,
+      "max": 100.0
+    }
+  },
+  "warnings": [],
+  "normalized_columns": [
+    "crop_id",
+    "soil_type",
+    "crop_stage",
+    "moi",
+    "temperature",
+    "humidity",
+    "result"
+  ]
+}

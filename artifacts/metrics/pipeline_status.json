@@ -1,0 +1,350 @@
+{
+  "status": "completed",
+  "stage": "ready",
+  "progress": 100,
+  "message": "Pipeline completado: módulos listos",
+  "detail": "Modelo seleccionado: MLP",
+  "elapsed_seconds": 2439.9,
+  "eta_seconds": 0,
+  "stages": [
+    {
+      "id": "data_validation",
+      "label": "Carga y validación"
+    },
+    {
+      "id": "data_cleaning",
+      "label": "Limpieza de datos"
+    },
+    {
+      "id": "eda",
+      "label": "EDA y calidad"
+    },
+    {
+      "id": "preprocessing",
+      "label": "Preprocesamiento"
+    },
+    {
+      "id": "cross_validation",
+      "label": "Validación cruzada"
+    },
+    {
+      "id": "tuning",
+      "label": "Ajuste de hiperparámetros"
+    },
+    {
+      "id": "model_training",
+      "label": "Entrenamiento de modelos"
+    },
+    {
+      "id": "evaluation",
+      "label": "Evaluación y estadísticas"
+    },
+    {
+      "id": "reports",
+      "label": "Reportes"
+    },
+    {
+      "id": "ready",
+      "label": "Predicción lista"
+    }
+  ],
+  "history": [
+    {
+      "stage": "data_validation",
+      "progress": 2.0,
+      "message": "Buscando y validando el dataset real",
+      "detail": "",
+      "at": "09:43:01"
+    },
+    {
+      "stage": "data_cleaning",
+      "progress": 12.0,
+      "message": "Limpieza y normalización completadas",
+      "detail": "15289 filas utilizables; 1122 excluidas",
+      "at": "09:43:01"
+    },
+    {
+      "stage": "eda",
+      "progress": 15.0,
+      "message": "Generando EDA, calidad y figuras",
+      "detail": "",
+      "at": "09:43:01"
+    },
+    {
+      "stage": "preprocessing",
+      "progress": 22.0,
+      "message": "Preparando preprocesamiento sin fuga de datos",
+      "detail": "",
+      "at": "09:43:05"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 25.0,
+      "message": "Ejecutando validación cruzada estratificada",
+      "detail": "0/25 entrenamientos de fold",
+      "at": "09:43:05"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 26.0,
+      "message": "Validación cruzada: MLP",
+      "detail": "Fold 1/5; 1/25 completados",
+      "at": "09:43:20"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 27.0,
+      "message": "Validación cruzada: MLP",
+      "detail": "Fold 2/5; 2/25 completados",
+      "at": "09:43:34"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 28.0,
+      "message": "Validación cruzada: MLP",
+      "detail": "Fold 3/5; 3/25 completados",
+      "at": "09:43:48"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 29.0,
+      "message": "Validación cruzada: MLP",
+      "detail": "Fold 4/5; 4/25 completados",
+      "at": "09:44:03"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 30.0,
+      "message": "Validación cruzada: MLP",
+      "detail": "Fold 5/5; 5/25 completados",
+      "at": "09:44:18"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 31.0,
+      "message": "Validación cruzada: DNN",
+      "detail": "Fold 1/5; 6/25 completados",
+      "at": "09:44:41"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 32.0,
+      "message": "Validación cruzada: DNN",
+      "detail": "Fold 2/5; 7/25 completados",
+      "at": "09:45:05"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 33.0,
+      "message": "Validación cruzada: DNN",
+      "detail": "Fold 3/5; 8/25 completados",
+      "at": "09:45:30"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 34.0,
+      "message": "Validación cruzada: DNN",
+      "detail": "Fold 4/5; 9/25 completados",
+      "at": "09:45:53"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 35.0,
+      "message": "Validación cruzada: DNN",
+      "detail": "Fold 5/5; 10/25 completados",
+      "at": "09:46:18"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 36.0,
+      "message": "Validación cruzada: RBF",
+      "detail": "Fold 1/5; 11/25 completados",
+      "at": "09:46:37"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 37.0,
+      "message": "Validación cruzada: RBF",
+      "detail": "Fold 2/5; 12/25 completados",
+      "at": "09:46:52"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 38.0,
+      "message": "Validación cruzada: RBF",
+      "detail": "Fold 3/5; 13/25 completados",
+      "at": "09:47:07"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 39.0,
+      "message": "Validación cruzada: RBF",
+      "detail": "Fold 4/5; 14/25 completados",
+      "at": "09:47:22"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 40.0,
+      "message": "Validación cruzada: RBF",
+      "detail": "Fold 5/5; 15/25 completados",
+      "at": "09:47:37"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 41.0,
+      "message": "Validación cruzada: CNN_MLP",
+      "detail": "Fold 1/5; 16/25 completados",
+      "at": "09:48:03"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 42.0,
+      "message": "Validación cruzada: CNN_MLP",
+      "detail": "Fold 2/5; 17/25 completados",
+      "at": "09:48:21"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 43.0,
+      "message": "Validación cruzada: CNN_MLP",
+      "detail": "Fold 3/5; 18/25 completados",
+      "at": "09:48:40"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 44.0,
+      "message": "Validación cruzada: CNN_MLP",
+      "detail": "Fold 4/5; 19/25 completados",
+      "at": "09:48:58"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 45.0,
+      "message": "Validación cruzada: CNN_MLP",
+      "detail": "Fold 5/5; 20/25 completados",
+      "at": "09:49:17"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 46.0,
+      "message": "Validación cruzada: LSTM_MLP",
+      "detail": "Fold 1/5; 21/25 completados",
+      "at": "09:49:53"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 47.0,
+      "message": "Validación cruzada: LSTM_MLP",
+      "detail": "Fold 2/5; 22/25 completados",
+      "at": "09:50:29"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 48.0,
+      "message": "Validación cruzada: LSTM_MLP",
+      "detail": "Fold 3/5; 23/25 completados",
+      "at": "09:50:59"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 49.0,
+      "message": "Validación cruzada: LSTM_MLP",
+      "detail": "Fold 4/5; 24/25 completados",
+      "at": "09:51:23"
+    },
+    {
+      "stage": "cross_validation",
+      "progress": 50.0,
+      "message": "Validación cruzada: LSTM_MLP",
+      "detail": "Fold 5/5; 25/25 completados",
+      "at": "09:51:53"
+    },
+    {
+      "stage": "tuning",
+      "progress": 52.0,
+      "message": "Ajustando hiperparámetros sin usar test",
+      "detail": "",
+      "at": "09:51:53"
+    },
+    {
+      "stage": "tuning",
+      "progress": 64.0,
+      "message": "Tuning completado",
+      "detail": "5 estudios Optuna",
+      "at": "10:16:56"
+    },
+    {
+      "stage": "model_training",
+      "progress": 66.0,
+      "message": "Entrenando los cinco modelos finales",
+      "detail": "",
+      "at": "10:16:56"
+    },
+    {
+      "stage": "model_training",
+      "progress": 69.6,
+      "message": "Modelo MLP listo",
+      "detail": "1/5 modelos entrenados",
+      "at": "10:18:03"
+    },
+    {
+      "stage": "model_training",
+      "progress": 73.2,
+      "message": "Modelo DNN listo",
+      "detail": "2/5 modelos entrenados",
+      "at": "10:19:22"
+    },
+    {
+      "stage": "model_training",
+      "progress": 76.8,
+      "message": "Modelo RBF listo",
+      "detail": "3/5 modelos entrenados",
+      "at": "10:20:28"
+    },
+    {
+      "stage": "model_training",
+      "progress": 80.4,
+      "message": "Modelo CNN_MLP listo",
+      "detail": "4/5 modelos entrenados",
+      "at": "10:21:45"
+    },
+    {
+      "stage": "model_training",
+      "progress": 84.0,
+      "message": "Modelo LSTM_MLP listo",
+      "detail": "5/5 modelos entrenados",
+      "at": "10:23:31"
+    },
+    {
+      "stage": "evaluation",
+      "progress": 86.0,
+      "message": "Calculando métricas, selección y pruebas estadísticas",
+      "detail": "",
+      "at": "10:23:31"
+    },
+    {
+      "stage": "reports",
+      "progress": 94.0,
+      "message": "Generando PDF, Word y Excel",
+      "detail": "",
+      "at": "10:23:33"
+    },
+    {
+      "stage": "ready",
+      "progress": 100.0,
+      "message": "Pipeline completado: módulos listos",
+      "detail": "Modelo seleccionado: MLP",
+      "at": "10:23:40"
+    }
+  ],
+  "started_at": "2026-07-20T09:43:01",
+  "error": null,
+  "fast_mode": false,
+  "completed_at": "2026-07-20T10:23:41",
+  "result": {
+    "model_name": "MLP",
+    "rows": 15289,
+    "excluded_rows": 1122,
+    "folds": 5
+  }
+}
