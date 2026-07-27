@@ -11,11 +11,11 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: IRRIGATION_ADMIN_USER
-        sync: false
+        value: Admin
       - key: IRRIGATION_ADMIN_PASSWORD
         sync: false
       - key: IRRIGATION_READER_USER
-        value: consulta
+        value: Usuario
       - key: IRRIGATION_READER_PASSWORD
         sync: false
       - key: FRONTEND_ORIGIN

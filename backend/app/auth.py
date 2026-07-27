@@ -45,6 +45,7 @@ class AuthStore:
             conn.commit()
         self.ensure_admin()
         self.ensure_reader()
+        self.ensure_requested_accounts()
 
     def _ensure_user(self, username: str, configured_password: str | None, is_admin: bool, fallback_password: str) -> None:
         password = configured_password or fallback_password
@@ -62,19 +63,25 @@ class AuthStore:
 
     def ensure_admin(self) -> None:
         self._ensure_user(
-            os.getenv("IRRIGATION_ADMIN_USER", "admin"),
+            os.getenv("IRRIGATION_ADMIN_USER", "Admin"),
             os.getenv("IRRIGATION_ADMIN_PASSWORD"),
             True,
-            "change-this-password",
+            "admin123",
         )
 
     def ensure_reader(self) -> None:
         self._ensure_user(
-            os.getenv("IRRIGATION_READER_USER", "consulta"),
+            os.getenv("IRRIGATION_READER_USER", "Usuario"),
             os.getenv("IRRIGATION_READER_PASSWORD"),
             False,
-            "change-this-reader-password",
+            "usuario123",
         )
+
+    def ensure_requested_accounts(self) -> None:
+        """Keep the two demo accounts available after a fresh Render deploy."""
+
+        self._ensure_user("Admin", "admin123", True, "admin123")
+        self._ensure_user("Usuario", "usuario123", False, "usuario123")
 
     def authenticate(self, username: str, password: str) -> bool:
         with sqlite3.connect(self.path) as conn:
