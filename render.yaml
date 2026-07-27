@@ -3,6 +3,7 @@ services:
     name: riego-ia-api
     runtime: docker
     plan: free
+    autoDeploy: true
     dockerfilePath: ./backend/Dockerfile
     dockerContext: .
     healthCheckPath: /health
@@ -29,6 +30,7 @@ services:
   - type: web
     name: riego-ia-interfaz
     runtime: static
+    autoDeploy: true
     buildCommand: cd frontend && npm install --legacy-peer-deps --no-audit --no-fund && npm run build
     staticPublishPath: ./frontend/dist
     envVars:
